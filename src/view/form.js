@@ -11,8 +11,8 @@ export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
     basePrice = '',
     dateFrom = '',
     dateTo = '',
-    durationTime = '',
-    isFavorite = false,
+    // durationTime = '',
+    // isFavorite = false,
     id = '',
     Offer = {
       type: 'flight',
