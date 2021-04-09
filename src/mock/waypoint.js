@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
-import {TYPES, DESTINATIONS, offers} from '../const.js';
+import {TYPES, DESTINATIONS, TITLES_OFFERS} from '../const.js';
 import {getRandomInteger} from '../util.js';
+import {generateChiefOffer} from './offer.js';
 
 
 const generateBasePrice = () => {
@@ -114,19 +115,6 @@ const renderPhotos = () => {
   return photos;
 };
 
-const generateOffers = (offers) => {
-  const randomOffers = new Array;
-
-  for (const offer of offers) {
-    const map = new Map(Object.entries(offer));
-    map.set('checked', Boolean(getRandomInteger(0, 1)));
-    const offerObject = Object.fromEntries(map);
-    randomOffers.push(offerObject);
-  }
-
-  return randomOffers;
-};
-
 const generateID = () => {
   return getRandomInteger(0, 100);
 };
@@ -143,7 +131,7 @@ export const generateWaypoint = () => {
   const durationTime = generateDurationTime(dateFrom, dateTo);
   const nameDestination = generateDestination();
   const typeEvent = generateType();
-  const offersRandomChecked = generateOffers(offers);
+  const Offer = generateChiefOffer(typeEvent, TITLES_OFFERS);
 
   return {
     type: typeEvent,
@@ -154,15 +142,12 @@ export const generateWaypoint = () => {
     durationTime,
     isFavorite: Boolean(getRandomInteger(0, 1)),
     id: generateID(),
-    Offer: {
-      type: typeEvent,
-      offers: offersRandomChecked,
-    },
     DestinationInformation: {
       description: generateInformation(),
       name: nameDestination,
       pictures: renderPhotos(),
     },
+    Offer,
   };
 };
 

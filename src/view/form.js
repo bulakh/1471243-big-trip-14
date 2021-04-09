@@ -52,13 +52,13 @@ export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
 
   const createOffer = (offers) => {
     const offerItems = new Array;
-    let idOffer = 0;
     for (const offer of offers) {
       const map = new Map(Object.entries(offer));
       const title = map.get('title');
       const price = map.get('price');
       const checked = map.get('checked');
-      idOffer++;
+      const idOffer = map.get('id');
+
 
       const offerItem = `<div class="event__offer-selector">
         <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${checked ? 'checked' : ''}>
