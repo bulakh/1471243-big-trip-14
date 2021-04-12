@@ -1,85 +1,90 @@
 import {TYPES, DESTINATIONS} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard} from '../util.js';
+import {timeStartOpenCard, timeEndOpenCard, createElement} from '../utils.js';
 import {toggleEditCancelButton, renderRollupButton} from './form-edit';
 
+const EMPTY_WAYPOINT = {
+  type: TYPES[0],
+  destination:  DESTINATIONS[0],
+  basePrice: '',
+  dateFrom : '',
+  dateTo: '',
+  durationTime: null,
+  isFavorite: false,
+  id: '',
+  Offer: {
+    type: TYPES[0],
+    offers: '',
+  },
+  DestinationInformation: {
+    description: '',
+    name: DESTINATIONS[0],
+    pictures: '',
+  },
+};
 
-export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
+const renderPictures = (information) => {
+  const pictures = information.pictures;
+  const imgItems = new Array;
+  for (const picture of pictures) {
+    const map = new Map(Object.entries(picture));
+    const src = map.get('src');
+    const description = map.get('description');
 
-  const {
-    type = 'flight',
-    destination = 'Berlin',
-    basePrice = '',
-    dateFrom = '',
-    dateTo = '',
-    // durationTime = '',
-    // isFavorite = false,
-    id = '',
-    Offer = {
-      type: 'flight',
-      offers: '',
-    },
-    DestinationInformation = {
-      description: '',
-      name: 'Berlin',
-      pictures: '',
-    }} = waypoint;
+    const imgItem = `<img class="event__photo" src="${src}" alt="${description}">`;
+    imgItems.push(imgItem);
+  }
+  return imgItems.join('');
+};
 
-  const renderPictures = (information) => {
-    const pictures = information.pictures;
-    const imgItems = new Array;
-    for (const picture of pictures) {
-      const map = new Map(Object.entries(picture));
-      const src = map.get('src');
-      const description = map.get('description');
+const createTypeEvent = (currentType, id) => {
+  return TYPES.map((type) => `<div class="event__type-item">
+    <input id="event-type-${type}-${id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}"
+    ${currentType === type ? 'checked' : ''}/>
+    <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${id}">${type[0].toUpperCase() + type.slice(1)}</label>
+  </div>`).join('');
+};
 
-      const imgItem = `<img class="event__photo" src="${src}" alt="${description}">`;
-      imgItems.push(imgItem);
-    }
-    return imgItems.join('');
-  };
+const createNameDestination = () => {
+  return DESTINATIONS.map((destination) => `<option value="${destination}"></option>`).join('');
+};
 
-  const createTypeEvent = (currentType) => {
-    return TYPES.map((type) => `<div class="event__type-item">
-      <input id="event-type-${type}-${id}" class="event__type-input  visually-hidden" type="radio" name="event-type" value="${type}"
-      ${currentType === type ? 'checked' : ''}/>
-      <label class="event__type-label  event__type-label--${type}" for="event-type-${type}-${id}">${type[0].toUpperCase() + type.slice(1)}</label>
-    </div>`).join('');
-  };
-
-  const createNameDestination = () => {
-    return DESTINATIONS.map((destination) => `<option value="${destination}"></option>`).join('');
-  };
-
-  const createOffer = (offers) => {
-    const offerItems = new Array;
-    for (const offer of offers) {
-      const map = new Map(Object.entries(offer));
-      const title = map.get('title');
-      const price = map.get('price');
-      const checked = map.get('checked');
-      const idOffer = map.get('id');
+const createOffer = (offers, type) => {
+  const offerItems = new Array;
+  for (const offer of offers) {
+    const map = new Map(Object.entries(offer));
+    const title = map.get('title');
+    const price = map.get('price');
+    const checked = map.get('checked');
+    const idOffer = map.get('id');
 
 
-      const offerItem = `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${checked ? 'checked' : ''}>
-        <label class="event__offer-label" for="event-offer-${type}-${idOffer}">
-          <span class="event__offer-title">${title}</span>
-          &plus;&euro;&nbsp;
-          <span class="event__offer-price">${price}</span>
-        </label>
-      </div>`;
-      offerItems.push(offerItem);
-    }
-    return offerItems.join('');
-  };
+    const offerItem = `<div class="event__offer-selector">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${checked ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offer-${type}-${idOffer}">
+        <span class="event__offer-title">${title}</span>
+        &plus;&euro;&nbsp;
+        <span class="event__offer-price">${price}</span>
+      </label>
+    </div>`;
+    offerItems.push(offerItem);
+  }
+  return offerItems.join('');
+};
 
-  const typeTemplate = createTypeEvent(type);
+const createFormEventTemplate = (waypoint, editForm) => {
+
+  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation} = waypoint;
+
+  const typeTemplate = createTypeEvent(type, id);
   const destinationTemplate = createNameDestination();
   const timeStart = timeStartOpenCard(dateFrom);
   const timeEnd = timeEndOpenCard(dateTo);
 
-  const editTemplateCancel = toggleEditCancelButton(editTemplate);
-  const editRollupButton = renderRollupButton(editTemplate);
+  const editTemplateCancel = toggleEditCancelButton(editForm);
+  const editRollupButton = renderRollupButton(editForm);
+
+  const offers = createOffer(Offer.offers, type);
+  const pictures = renderPictures(DestinationInformation);
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -134,7 +139,7 @@ export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
           <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
           <div class="event__available-offers">
-            ${createOffer(Offer.offers)}
+            ${offers}
           </div>
         </section>
 
@@ -144,7 +149,7 @@ export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
 
           <div class="event__photos-container">
             <div class="event__photos-tape">
-            ${renderPictures(DestinationInformation)}
+            ${pictures}
             </div>
           </div>
         </section>
@@ -152,3 +157,27 @@ export const createFormEventTemplate = (waypoint = {}, editTemplate) => {
     </form>
   </li>`;
 };
+
+export default class FormWaipoint {
+  constructor(waypoint = EMPTY_WAYPOINT, editForm) {
+    this._waypoint = waypoint;
+    this._editForm = editForm;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createFormEventTemplate(this._waypoint, this._editForm);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

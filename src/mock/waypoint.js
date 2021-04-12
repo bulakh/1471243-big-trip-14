@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import {TYPES, DESTINATIONS, TITLES_OFFERS} from '../const.js';
-import {getRandomInteger} from '../util.js';
+import {getRandomInteger} from '../utils.js';
 import {generateChiefOffer} from './offer.js';
 
 

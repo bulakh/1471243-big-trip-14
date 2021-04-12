@@ -1,14 +1,7 @@
-import {sortDate, timeStart, timeEnd, getSumCost} from '../mock/information-rout.js';
+import {createElement} from '../utils.js';
 
-export const createInformationRoutTemplate = (waypoints) => {
-  const sortedWaypoints = sortDate(waypoints);
-
-  const firstDestination = sortedWaypoints[0].destination;
-  const secondDestination = sortedWaypoints.length === 3 ? sortedWaypoints[1].destination : '...';
-  const lastDestination = sortedWaypoints[sortedWaypoints.length - 1].destination;
-  const startDay = timeStart(sortedWaypoints[0].dateFrom);
-  const lastDay = timeEnd(sortedWaypoints[sortedWaypoints.length - 1].dateFrom);
-  const sumOfCosts = getSumCost(waypoints);
+const createInformationRoutTemplate = (routInfo) => {
+  const {firstDestination, secondDestination, lastDestination, startDay, lastDay,sumOfCosts} = routInfo;
 
   return `<section class="trip-main__trip-info  trip-info">
     <div class="trip-info__main">
@@ -22,3 +15,26 @@ export const createInformationRoutTemplate = (waypoints) => {
     </p>
   </section>`;
 };
+
+export default class InformationRout {
+  constructor(routInfo) {
+    this._routInfo = routInfo;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createInformationRoutTemplate(this._routInfo);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

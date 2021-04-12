@@ -1,6 +1,6 @@
-import {dayOfStartEvent, timeStart, timeEnd} from '../util.js';
+import {dayOfStartEvent, timeStart, timeEnd, createElement} from '../utils.js';
 
-export const createWaypointTemplate = (waypoint = {}) => {
+const createWaypointTemplate = (waypoint = {}) => {
   const {basePrice, dateFrom, dateTo, durationTime, type, Offer, destination, isFavorite} = waypoint;
 
   const renderOffers = (Offer) => {
@@ -63,3 +63,26 @@ export const createWaypointTemplate = (waypoint = {}) => {
     </div>
   </li>`;
 };
+
+export default class Waypoint {
+  constructor(waypoint) {
+    this._waypoint = waypoint;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createWaypointTemplate(this._waypoint);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

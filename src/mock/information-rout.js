@@ -17,4 +17,21 @@ const getSumCost = (waypoints) => {
 const timeStart = (dateFrom) => {return dayjs(dateFrom).format('MMMM D');};
 const timeEnd = (dateTo) => {return dayjs(dateTo).format('MMMM DD');};
 
-export {sortDate, timeStart, timeEnd, getSumCost};
+export const generateInformationOfRout = (waypoints) => {
+  const sortedWaypoints = sortDate(waypoints);
+
+  const firstDestination = sortedWaypoints[0].destination;
+  const secondDestination = sortedWaypoints.length === 3 ? sortedWaypoints[1].destination : '...';
+  const lastDestination = sortedWaypoints[sortedWaypoints.length - 1].destination;
+  const startDay = timeStart(sortedWaypoints[0].dateFrom);
+  const lastDay = timeEnd(sortedWaypoints[sortedWaypoints.length - 1].dateFrom);
+  const sumOfCosts = getSumCost(waypoints);
+  return {
+    firstDestination,
+    secondDestination,
+    lastDestination,
+    startDay,
+    lastDay,
+    sumOfCosts,
+  };
+};
