@@ -1,26 +1,6 @@
-import {TYPES, DESTINATIONS} from '../const.js';
+import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
 import {timeStartOpenCard, timeEndOpenCard, createElement} from '../utils.js';
 import {toggleEditCancelButton, renderRollupButton} from './form-edit';
-
-const EMPTY_WAYPOINT = {
-  type: TYPES[0],
-  destination:  DESTINATIONS[0],
-  basePrice: '',
-  dateFrom : '',
-  dateTo: '',
-  durationTime: null,
-  isFavorite: false,
-  id: '',
-  Offer: {
-    type: TYPES[0],
-    offers: '',
-  },
-  DestinationInformation: {
-    description: '',
-    name: DESTINATIONS[0],
-    pictures: '',
-  },
-};
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
@@ -56,7 +36,6 @@ const createOffer = (offers, type) => {
     const price = map.get('price');
     const checked = map.get('checked');
     const idOffer = map.get('id');
-
 
     const offerItem = `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${checked ? 'checked' : ''}>
