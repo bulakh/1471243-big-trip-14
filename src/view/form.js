@@ -1,6 +1,7 @@
+import AbstractView from './abstract.js';
 import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard, createElement} from '../utils.js';
-import {toggleEditCancelButton, renderRollupButton} from './form-edit';
+import {timeStartOpenCard, timeEndOpenCard} from '../utils/waypoint.js';
+import {toggleEditCancelButton, renderRollupButton} from './form-edit.js';
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
@@ -137,26 +138,33 @@ const createFormEventTemplate = (waypoint, editForm) => {
   </li>`;
 };
 
-export default class FormWaipoint {
+export default class FormWaipoint extends AbstractView {
   constructor(waypoint = EMPTY_WAYPOINT, editForm) {
+    super();
     this._waypoint = waypoint;
     this._editForm = editForm;
-    this._element = null;
+    this._editClickHandler = this._editClickHandler.bind(this);
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
   }
 
   getTemplate() {
     return createFormEventTemplate(this._waypoint, this._editForm);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
+  _editClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
   }
 
-  removeElement() {
-    this._element = null;
+  _formSubmitHandler(evt) {
+    evt.preventDefault();
+    this._callback.formSubmit();
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this._callback.editClick = callback;
+    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
+    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
   }
 }

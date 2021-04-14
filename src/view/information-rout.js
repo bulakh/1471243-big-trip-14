@@ -1,4 +1,4 @@
-import {createElement} from '../utils.js';
+import AbstractView from './abstract.js';
 
 const createInformationRoutTemplate = (routInfo) => {
   const {firstDestination, secondDestination, lastDestination, startDay, lastDay,sumOfCosts} = routInfo;
@@ -16,25 +16,13 @@ const createInformationRoutTemplate = (routInfo) => {
   </section>`;
 };
 
-export default class InformationRout {
+export default class InformationRout extends AbstractView {
   constructor(routInfo) {
+    super();
     this._routInfo = routInfo;
-    this._element = null;
   }
 
   getTemplate() {
     return createInformationRoutTemplate(this._routInfo);
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }
