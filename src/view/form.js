@@ -139,32 +139,36 @@ const createFormEventTemplate = (waypoint, editForm) => {
 };
 
 export default class FormWaipoint extends AbstractView {
-  constructor(waypoint = EMPTY_WAYPOINT, editForm) {
+  constructor(waypoint = EMPTY_WAYPOINT, EDIT_FORM) {
     super();
     this._waypoint = waypoint;
-    this._editForm = editForm;
-    this._editClickHandler = this._editClickHandler.bind(this);
+    this._editForm = EDIT_FORM;
+
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
+    this._backToCardClickHandler = this._backToCardClickHandler.bind(this);
   }
 
   getTemplate() {
     return createFormEventTemplate(this._waypoint, this._editForm);
   }
 
-  _editClickHandler(evt) {
+  _backToCardClickHandler(evt) {
     evt.preventDefault();
-    this._callback.editClick();
+    this._callback.backClick();
   }
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit();
+    this._callback.formSubmit(this._waypoint, this._editForm);
   }
 
   setFormSubmitHandler(callback) {
     this._callback.formSubmit = callback;
-    this._callback.editClick = callback;
-    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
     this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  setCardtoBackHandler(callback) {
+    this._callback.backClick = callback;
+    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
   }
 }
