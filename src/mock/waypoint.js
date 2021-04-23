@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import {nanoid} from 'nanoid';
 import {TYPES, DESTINATIONS, TITLES_OFFERS} from '../const.js';
 import {getRandomInteger} from '../utils/common.js';
 import {generateChiefOffer} from './offer.js';
@@ -39,7 +40,7 @@ const generateDateFrom = () => {
   const MAX_HOUR_ADD = 23;
   const MAX_MINUTE_ADD = 59;
 
-  const daysAdd = getRandomInteger(1, MAX_DAY_ADD);
+  const daysAdd = getRandomInteger(-7, MAX_DAY_ADD);
   const hourAny = getRandomInteger(0, MAX_HOUR_ADD);
   const minuteAny = getRandomInteger(0, MAX_MINUTE_ADD);
 
@@ -115,10 +116,6 @@ const renderPhotos = () => {
   return photos;
 };
 
-const generateID = () => {
-  return getRandomInteger(0, 100);
-};
-
 const generateType = () => {
   const randomIndex = getRandomInteger(0, TYPES.length - 1);
 
@@ -134,6 +131,7 @@ export const generateWaypoint = () => {
   const Offer = generateChiefOffer(typeEvent, TITLES_OFFERS);
 
   return {
+    id: nanoid(),
     type: typeEvent,
     destination: nameDestination,
     basePrice: generateBasePrice(),
@@ -141,7 +139,6 @@ export const generateWaypoint = () => {
     dateTo,
     durationTime,
     isFavorite: Boolean(getRandomInteger(0, 1)),
-    id: generateID(),
     DestinationInformation: {
       description: generateInformation(),
       name: nameDestination,
