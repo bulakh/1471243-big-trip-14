@@ -2,7 +2,7 @@ import {generateWaypoint} from './mock/waypoint.js';
 import TripHeaderPresenter from './presenter/trip-header.js';
 import TripPesenter from './presenter/trip.js';
 
-const WAYPOINT_COUNT = 22;
+const WAYPOINT_COUNT = 20;
 const EDIT_FORM = true;
 
 const waypoints = new Array(WAYPOINT_COUNT).fill().map(generateWaypoint);
