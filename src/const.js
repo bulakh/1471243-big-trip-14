@@ -22,4 +22,10 @@ const EMPTY_WAYPOINT = [{
   },
 }];
 
-export {TYPES, DESTINATIONS, TITLES_OFFERS, EMPTY_WAYPOINT};
+const SortType = {
+  DEFAULT: 'default',
+  TIME: 'time',
+  PRICE: 'price',
+};
+
+export {TYPES, DESTINATIONS, TITLES_OFFERS, EMPTY_WAYPOINT, SortType};

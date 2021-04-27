@@ -4,11 +4,14 @@ import NoWaypointView from '../view/no-waypoints.js';
 import WaypointPresenter from './waypoint.js';
 import {updateItem} from '../utils/common.js';
 import {render, RenderPosition} from '../utils/render.js';
+import {sortTime, sortPrice} from '../utils/waypoint.js';
+import {SortType} from '../const.js';
 
 export default class Trip {
   constructor(tripEvents) {
     this._tripEvents = tripEvents;
     this._waypointPresenter = {};
+    this._currentSortType = SortType.DEFAULT;
 
     this._sortComponent = new SortView();
     this._waypointListComponent = new PointsListView();
@@ -16,16 +19,17 @@ export default class Trip {
 
     this._handleWaypointChange = this._handleWaypointChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
   init(waypoints, EDIT_FORM) {
     this._waypoints = waypoints.slice();
     this._editForm = EDIT_FORM;
+    this._sourcedWaypoints = waypoints.slice();
 
-    render(this._tripEvents, this._sortComponent, RenderPosition.BEFOREEND);
     render(this._tripEvents, this._waypointListComponent, RenderPosition.BEFOREEND);
 
-    this._renderTrip(this._waypoints, this._editForm);
+    this._renderTrip();
   }
 
   _handleModeChange() {
@@ -34,9 +38,39 @@ export default class Trip {
       .forEach((presenter) => presenter.resetView());
   }
 
-  _handleWaypointChange(updatedWaypoint, EDIT_FORM) {
+  _handleWaypointChange(updatedWaypoint) {
     this._waypoints = updateItem(this._waypoints, updatedWaypoint);
-    this._waypointPresenter[updatedWaypoint.id].init(updatedWaypoint, EDIT_FORM);
+    this._sourcedWaypoints = updateItem(this._sourcedWaypoints, updatedWaypoint);
+    this._waypointPresenter[updatedWaypoint.id].init(updatedWaypoint, this._editForm);
+  }
+
+  _sortWaypoints(sortType) {
+    switch (sortType) {
+      case SortType.TIME:
+        this._waypoints.sort(sortTime);
+        break;
+      case SortType.PRICE:
+        this._waypoints.sort(sortPrice);
+        break;
+      default:
+        this._waypoints = this._sourcedWaypoints.slice();
+    }
+    this._currentSortType = sortType;
+  }
+
+  _handleSortTypeChange(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+
+    this._sortWaypoints(sortType);
+    this._clearWaypointList();
+    this._renderWaypoints();
+  }
+
+  _renderSort() {
+    render(this._tripEvents, this._sortComponent, RenderPosition.AFTERBEGIN);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
   _renderWaypoint(waypoint, EDIT_FORM) {
@@ -45,8 +79,8 @@ export default class Trip {
     this._waypointPresenter[waypoint.id] = waypointPresenter;
   }
 
-  _renderWaypoints(waypoints, EDIT_FORM) {
-    waypoints.forEach((waypoint) => this._renderWaypoint(waypoint, EDIT_FORM));
+  _renderWaypoints() {
+    this._waypoints.forEach((waypoint) => this._renderWaypoint(waypoint, this._editForm));
   }
 
   _renderNoWaypoints() {
@@ -60,11 +94,12 @@ export default class Trip {
     this._waypointPresenter = {};
   }
 
-  _renderTrip(waypoints, EDIT_FORM) {
-    if (waypoints.length === 0) {
+  _renderTrip() {
+    if (this._waypoints.length === 0) {
       this._renderNoWaypoints();
     }
-    this._renderWaypoints(waypoints, EDIT_FORM);
+    this._renderSort();
+    this._renderWaypoints();
   }
 }
 
