@@ -22,31 +22,22 @@ const getWeightForNullCount = (CountA, CountB) => {
   return null;
 };
 
-const getMinutesFromDurationTime = (time) => {
-  let countMinute = 0;
-  const separateTimes = time.split(' ');
-  separateTimes.forEach((elem) => {
-    if (/\d+d/gi.test(elem)) {
-      countMinute += parseInt(elem, 10) * 1440;
-    }
-    if (/\d+h/gi.test(elem)) {
-      countMinute += parseInt(elem, 10) * 60;
-    }
-    if (/\d+m/gi.test(elem)) {
-      countMinute += parseInt(elem, 10);
-    }
-  });
-  return countMinute;
-};
-
 export const sortTime = (waypointA, waypointB) => {
-  const weight = getWeightForNullCount(waypointA.durationTime, waypointB.durationTime);
+  const waypointAdateFrom = dayjs(waypointA.dateFrom);
+  const waypointBdateFrom = dayjs(waypointB.dateFrom);
+  const waypointAdateTo = dayjs(waypointA.dateTo);
+  const waypointBdateTo = dayjs(waypointB.dateTo);
+  const diffDateWaypointA = waypointAdateTo.diff(waypointAdateFrom);
+  const diffDateWaypointB = waypointBdateTo.diff(waypointBdateFrom);
+
+
+  const weight = getWeightForNullCount(waypointA.dateFrom, waypointB.dateFrom);
 
   if (weight !== null) {
     return weight;
   }
 
-  return getMinutesFromDurationTime(waypointB.durationTime) - getMinutesFromDurationTime(waypointA.durationTime);
+  return diffDateWaypointB - diffDateWaypointA;
 };
 
 export const sortPrice = (waypointA, waypointB) => {
