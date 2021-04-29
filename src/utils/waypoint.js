@@ -41,11 +41,14 @@ export const sortTime = (waypointA, waypointB) => {
 };
 
 export const sortPrice = (waypointA, waypointB) => {
+  const waypointAbasePrice = dayjs(waypointA.basePrice);
+  const waypointBbasePrice = dayjs(waypointB.basePrice);
+
   const weight = getWeightForNullCount(waypointA.basePrice, waypointB.basePrice);
 
   if (weight !== null) {
     return weight;
   }
 
-  return waypointB.basePrice - waypointA.basePrice;
+  return waypointBbasePrice - waypointAbasePrice;
 };

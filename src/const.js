@@ -1,6 +1,6 @@
 const TYPES = ['taxi', 'bus', 'train', 'ship', 'transport', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
 const TITLES_OFFERS = ['Choose meal', 'Upgrade to comfort class', 'Order Uber', 'Add luggage', 'Switch to comfort'];
-const DESTINATIONS = ['Paris', 'Rome', 'Berlin', 'Lisbon', 'Barcelona', 'Amsterdam'];
+const DESTINATIONS = ['Paris', 'Rome', 'Berlin', 'Lisbon', 'Barcelona', 'Amsterdam', 'Moscow'];
 
 const EMPTY_WAYPOINT = [{
   type: TYPES[0],

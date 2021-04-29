@@ -6,7 +6,7 @@ const generateOffer = (title, id) => {
     id: id,
     title: title,
     price: getRandomInteger(1, 10) + '0',
-    checked: Boolean(getRandomInteger(0, 1)),
+    isChecked: Boolean(getRandomInteger(0, 1)),
   };
 };
 

@@ -89,7 +89,7 @@ const generateDestination = () => {
 };
 
 const generateSrcPhotos = () => {
-  const numberPhoto = getRandomInteger(0, 100);
+  const numberPhoto = getRandomInteger(0, 1000);
 
   return 'http://picsum.photos/248/152?r=' + numberPhoto;
 };

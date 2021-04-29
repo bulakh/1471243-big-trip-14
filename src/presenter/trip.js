@@ -74,7 +74,7 @@ export default class Trip {
   }
 
   _renderWaypoint(waypoint, EDIT_FORM) {
-    const waypointPresenter = new WaypointPresenter(this._waypointListComponent, this._handleWaypointChange, this._handleModeChange);
+    const waypointPresenter = new WaypointPresenter(this._waypointListComponent, this._handleWaypointChange, this._handleModeChange, this._waypoints);
     waypointPresenter.init(waypoint, EDIT_FORM);
     this._waypointPresenter[waypoint.id] = waypointPresenter;
   }
@@ -96,7 +96,7 @@ export default class Trip {
 
   _renderTrip() {
     if (this._waypoints.length === 0) {
-      this._renderNoWaypoints();
+      return this._renderNoWaypoints();
     }
     this._renderSort();
     this._renderWaypoints();

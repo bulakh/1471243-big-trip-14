@@ -1,7 +1,6 @@
-import AbstractView from './abstract.js';
+import SmartView from './smart.js';
 import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
 import {timeStartOpenCard, timeEndOpenCard} from '../utils/waypoint.js';
-import {toggleEditCancelButton, renderRollupButton} from './form-edit.js';
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
@@ -35,11 +34,11 @@ const createOffer = (offers, type) => {
     const map = new Map(Object.entries(offer));
     const title = map.get('title');
     const price = map.get('price');
-    const checked = map.get('checked');
+    const isChecked = map.get('isChecked');
     const idOffer = map.get('id');
 
     const offerItem = `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${checked ? 'checked' : ''}>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-${type}-${idOffer}">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
@@ -51,9 +50,50 @@ const createOffer = (offers, type) => {
   return offerItems.join('');
 };
 
-const createFormEventTemplate = (waypoint, editForm) => {
+const toggleEditCancelButton = (edit) => {
+  return edit
+    ? 'Delete'
+    : 'Cancel';
+};
 
-  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation} = waypoint;
+const renderRollupButton = (edit) => {
+  return edit
+    ? `<button class="event__rollup-btn" type="button">
+      <span class="visually-hidden">Open event</span>
+    </button>`
+    : '';
+};
+
+const createSectionDestination = (isDestination, DestinationInformation, pictures) => {
+  return isDestination
+    ? `<section class="event__section  event__section--destination">
+      <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+      <p class="event__destination-description">${DestinationInformation.description}</p>
+
+      <div class="event__photos-container">
+        <div class="event__photos-tape">
+        ${pictures}
+        </div>
+      </div>
+    </section>`
+    : '';
+};
+
+const createSectionOffer = (isOffer, offers) => {
+  return isOffer
+    ? `<section class="event__section  event__section--offers">
+      <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+
+      <div class="event__available-offers">
+        ${offers}
+      </div>
+    </section>`
+    : '';
+};
+
+const createFormEventTemplate = (data, editForm) => {
+
+  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation, isOffer, isDestination} = data;
 
   const typeTemplate = createTypeEvent(type, id);
   const destinationTemplate = createNameDestination();
@@ -65,6 +105,10 @@ const createFormEventTemplate = (waypoint, editForm) => {
 
   const offers = createOffer(Offer.offers, type);
   const pictures = renderPictures(DestinationInformation);
+
+  const sectionOffer = createSectionOffer(isOffer, offers);
+  const sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
+
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -115,41 +159,124 @@ const createFormEventTemplate = (waypoint, editForm) => {
         ${editRollupButton}
       </header>
       <section class="event__details">
-        <section class="event__section  event__section--offers">
-          <h3 class="event__section-title  event__section-title--offers">Offers</h3>
+        ${sectionOffer}
 
-          <div class="event__available-offers">
-            ${offers}
-          </div>
-        </section>
-
-        <section class="event__section  event__section--destination">
-          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-          <p class="event__destination-description">${DestinationInformation.description}</p>
-
-          <div class="event__photos-container">
-            <div class="event__photos-tape">
-            ${pictures}
-            </div>
-          </div>
-        </section>
+        ${sectionDestination}
       </section>
     </form>
   </li>`;
 };
 
-export default class FormWaipoint extends AbstractView {
-  constructor(waypoint = EMPTY_WAYPOINT, EDIT_FORM) {
+export default class FormWaipoint extends SmartView {
+  constructor(waypoint = EMPTY_WAYPOINT, EDIT_FORM, allWaypoints) {
     super();
-    this._waypoint = waypoint;
+    this._data = FormWaipoint.parseWaypointToData(waypoint);
     this._editForm = EDIT_FORM;
+    this._allWaypoints = allWaypoints;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._backToCardClickHandler = this._backToCardClickHandler.bind(this);
+
+    this._destinationInputHandler = this._destinationInputHandler.bind(this);
+    this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
+    this._typeChangeHandler = this._typeChangeHandler.bind(this);
+
+    this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createFormEventTemplate(this._waypoint, this._editForm);
+    return createFormEventTemplate(this._data, this._editForm);
+  }
+
+  reset(waypoint) {
+    this.updateData(
+      FormWaipoint.parseWaypointToData(waypoint),
+    );
+  }
+
+  restoreHandlers() {
+    this._setInnerHandlers();
+    this.setFormSubmitHandler(this._callback.formSubmit);
+    this.setCardtoBackHandler(this._callback.backClick);
+  }
+
+  _setInnerHandlers() {
+    this.getElement()
+      .querySelector('.event__input--destination')
+      .addEventListener('change', this._destinationChangeHandler);
+    this.getElement()
+      .querySelector('.event__type-group')
+      .addEventListener('change', this._offersChangeHandler);
+    this.getElement()
+      .querySelector('.event__input--destination')
+      .addEventListener('input', this._destinationInputHandler);
+    this.getElement()
+      .querySelector('.event__type-group')
+      .addEventListener('change', this._typeChangeHandler);
+  }
+
+  _destinationInputHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      destination: evt.target.value,
+    }, true);
+  }
+
+  _destinationChangeHandler(evt) {
+    evt.preventDefault();
+
+    const findDestinationWaypointHandler = (elem) => {
+      if (elem.destination === evt.target.value) {
+        return elem.DestinationInformation;
+      }
+    };
+
+    const findedDestinationWaypoint = this._allWaypoints.find(findDestinationWaypointHandler);
+
+    this.updateData({
+      DestinationInformation: Object.assign(
+        {},
+        this._data.DestinationInformation,
+        {
+          name: evt.target.value,
+          description: findedDestinationWaypoint ? findedDestinationWaypoint.DestinationInformation.description : '',
+          pictures: findedDestinationWaypoint ? findedDestinationWaypoint.DestinationInformation.pictures : [],
+        },
+      ),
+      isDestination: findedDestinationWaypoint,
+    });
+  }
+
+  _offersChangeHandler(evt) {
+    evt.preventDefault();
+
+    const findTypeWaypointHandler = (elem) => {
+      if (elem.type === evt.target.value) {
+        return elem.Offer;
+      }
+    };
+
+    const findedTypeWaypoint = this._allWaypoints.find(findTypeWaypointHandler);
+
+    this.updateData({
+      Offer: Object.assign(
+        {},
+        this._data.Offer,
+        {
+          type: evt.target.value,
+          offers: findedTypeWaypoint ? findedTypeWaypoint.Offer.offers : [],
+        },
+      ),
+      isOffer: findedTypeWaypoint ? findedTypeWaypoint.Offer.offers.length !== 0 : false,
+    });
+  }
+
+  _typeChangeHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      type: evt.target.value,
+    });
   }
 
   _backToCardClickHandler(evt) {
@@ -159,7 +286,7 @@ export default class FormWaipoint extends AbstractView {
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(this._waypoint, this._editForm);
+    this._callback.formSubmit(FormWaipoint.parseDataToWaypoint(this._data));
   }
 
   setFormSubmitHandler(callback) {
@@ -170,5 +297,25 @@ export default class FormWaipoint extends AbstractView {
   setCardtoBackHandler(callback) {
     this._callback.backClick = callback;
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
+  }
+
+  static parseWaypointToData(waypoint) {
+    return Object.assign(
+      {},
+      waypoint,
+      {
+        isOffer: waypoint.Offer.offers.length !== 0,
+        isDestination: waypoint.destination.trim() !== String(),
+      },
+    );
+  }
+
+  static parseDataToWaypoint(data) {
+    data = Object.assign({}, data);
+
+    delete data.isOffer;
+    delete data.isDestination;
+
+    return data;
   }
 }
