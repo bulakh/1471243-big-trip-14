@@ -1,9 +1,10 @@
 import {getRandomInteger} from '../utils/common.js';
+import {nanoid} from 'nanoid';
 
 
-const generateOffer = (title, id) => {
+const generateOffer = (title) => {
   return {
-    id: id,
+    id: nanoid(),
     title: title,
     price: getRandomInteger(1, 10) + '0',
     isChecked: Boolean(getRandomInteger(0, 1)),
@@ -12,10 +13,8 @@ const generateOffer = (title, id) => {
 
 const generateOffers = (titles) => {
   const offers = new Array;
-  let countID = 0;
   for (const title of titles) {
-    countID++;
-    const offer = generateOffer(title, countID);
+    const offer = generateOffer(title);
     offers.push(offer);
   }
   return offers;

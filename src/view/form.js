@@ -38,7 +38,8 @@ const createOffer = (offers, type) => {
     const idOffer = map.get('id');
 
     const offerItem = `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}"
+      data-id="${idOffer}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
       <label class="event__offer-label" for="event-offer-${type}-${idOffer}">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
@@ -181,6 +182,7 @@ export default class FormWaipoint extends SmartView {
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._offersToggleHandler = this._offersToggleHandler.bind(this);
 
     this._setInnerHandlers();
   }
@@ -214,6 +216,9 @@ export default class FormWaipoint extends SmartView {
     this.getElement()
       .querySelector('.event__type-group')
       .addEventListener('change', this._typeChangeHandler);
+    this.getElement()
+      .querySelector('.event__section--offers')
+      .addEventListener('change', this._offersToggleHandler);
   }
 
   _destinationInputHandler(evt) {
@@ -270,6 +275,20 @@ export default class FormWaipoint extends SmartView {
       ),
       isOffer: findedTypeWaypoint ? findedTypeWaypoint.Offer.offers.length !== 0 : false,
     });
+  }
+
+  _offersToggleHandler(evt) {
+    evt.preventDefault();
+
+    this.updateData({
+      Offer: Object.assign(
+        {},
+        this._data.Offer,
+        {
+          [evt.target.dataset.id]: this._data.Offer.offers.map((el) => {if (evt.target.dataset.id === el.id) {el.isChecked = !el.isChecked;}}),
+        },
+      ),
+    }, true);
   }
 
   _typeChangeHandler(evt) {
