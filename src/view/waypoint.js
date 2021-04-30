@@ -11,7 +11,7 @@ const createWaypointTemplate = (waypoint = {}) => {
       const map = new Map(Object.entries(eventOffer));
       const title = map.get('title');
       const price = map.get('price');
-      const checked = map.get('checked');
+      const isChecked = map.get('isChecked');
 
       const offerItem = `<li class="event__offer">
         <span class="event__offer-title">${title}</span>
@@ -19,7 +19,7 @@ const createWaypointTemplate = (waypoint = {}) => {
         <span class="event__offer-price">${price}</span>
       </li>`;
 
-      if (checked === true) {
+      if (isChecked === true) {
         offerItems.push(offerItem);
       }
     }

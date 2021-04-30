@@ -8,10 +8,11 @@ const Mode = {
 };
 
 export default class Waypoint {
-  constructor (waypointContainer, changeData, changeMode) {
+  constructor (waypointContainer, changeData, changeMode, allWaypoints) {
     this._waypointContainer = waypointContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
+    this._allWaypoints = allWaypoints;
 
     this._waypointComponent = null;
     this._waypointEditComponent = null;
@@ -32,7 +33,7 @@ export default class Waypoint {
     const prevWaypointEditFormComponent = this._waypointEditFormComponent;
 
     this._waypointComponent = new WaypointView(waypoint);
-    this._waypointEditFormComponent = new FormWaipointView(waypoint, EDIT_FORM);
+    this._waypointEditFormComponent = new FormWaipointView(waypoint, EDIT_FORM, this._allWaypoints);
 
     this._waypointComponent.setEditClickHandler(this._handleEditClick);
     this._waypointComponent.setFavoriteClickHandler(this._handleFavoriteClick);
@@ -83,6 +84,7 @@ export default class Waypoint {
   _escKeyDownHandler(evt) {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this._waypointEditFormComponent.reset(this._waypoint);
       this._replaceFormToCard();
     }
   }
@@ -92,6 +94,7 @@ export default class Waypoint {
   }
 
   _handleCardToBack() {
+    this._waypointEditFormComponent.reset(this._waypoint);
     this._replaceFormToCard();
   }
 

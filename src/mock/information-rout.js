@@ -35,14 +35,3 @@ export const generateInformationOfRout = (waypoints) => {
     sumOfCosts,
   };
 };
-
-export const generateEmptyInformation = () => {
-  return {
-    firstDestination: 'Berlin',
-    secondDestination: 'Paris',
-    lastDestination: 'Lisbon',
-    startDay: '',
-    lastDay: '',
-    sumOfCosts: '',
-  };
-};
