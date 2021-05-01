@@ -1,6 +1,10 @@
 import SmartView from './smart.js';
 import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard} from '../utils/waypoint.js';
+import {timeStartOpenCard, timeEndOpenCard, generateDurationTime} from '../utils/waypoint.js';
+import dayjs from 'dayjs';
+import flatpickr from 'flatpickr';
+
+import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
@@ -65,6 +69,12 @@ const renderRollupButton = (edit) => {
     : '';
 };
 
+const checkSubmitDisabled = (isSubmitDisabled) => {
+  return isSubmitDisabled
+    ? 'disabled'
+    : '';
+};
+
 const createSectionDestination = (isDestination, DestinationInformation, pictures) => {
   return isDestination
     ? `<section class="event__section  event__section--destination">
@@ -94,7 +104,7 @@ const createSectionOffer = (isOffer, offers) => {
 
 const createFormEventTemplate = (data, editForm) => {
 
-  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation, isOffer, isDestination} = data;
+  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation, isOffer, isDestination, isSubmitDisabled} = data;
 
   const typeTemplate = createTypeEvent(type, id);
   const destinationTemplate = createNameDestination();
@@ -109,6 +119,7 @@ const createFormEventTemplate = (data, editForm) => {
 
   const sectionOffer = createSectionOffer(isOffer, offers);
   const sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
+  const isDisabled = checkSubmitDisabled(isSubmitDisabled);
 
 
   return `<li class="trip-events__item">
@@ -141,10 +152,10 @@ const createFormEventTemplate = (data, editForm) => {
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${id}">From</label>
-          <input class="event__input  event__input--time" id="event-start-time-${id}" type="text" name="event-start-time" value="${timeStart}">
+          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${id}" type="text" name="event-start-time" value="${timeStart}">
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time" id="event-end-time-${id}" type="text" name="event-end-time" value="${timeEnd}">
+          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${id}" type="text" name="event-end-time" value="${timeEnd}">
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -155,7 +166,7 @@ const createFormEventTemplate = (data, editForm) => {
           <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled}>Save</button>
         <button class="event__reset-btn" type="reset">${editTemplateCancel}</button>
         ${editRollupButton}
       </header>
@@ -174,6 +185,8 @@ export default class FormWaipoint extends SmartView {
     this._data = FormWaipoint.parseWaypointToData(waypoint);
     this._editForm = EDIT_FORM;
     this._allWaypoints = allWaypoints;
+    this._datepickerStart = null;
+    this._datepickerEnd = null;
 
     this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._backToCardClickHandler = this._backToCardClickHandler.bind(this);
@@ -183,8 +196,12 @@ export default class FormWaipoint extends SmartView {
     this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
     this._offersToggleHandler = this._offersToggleHandler.bind(this);
+    this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
+    this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
+    this._durationCountHandler = this._durationCountHandler.bind(this);
 
     this._setInnerHandlers();
+    this._setDatepicker();
   }
 
   getTemplate() {
@@ -201,6 +218,7 @@ export default class FormWaipoint extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setCardtoBackHandler(this._callback.backClick);
+    this._setDatepicker();
   }
 
   _setInnerHandlers() {
@@ -216,9 +234,46 @@ export default class FormWaipoint extends SmartView {
     this.getElement()
       .querySelector('.event__type-group')
       .addEventListener('change', this._typeChangeHandler);
+    if (this._data.isOffer) {
+      this.getElement()
+        .querySelector('.event__section--offers')
+        .addEventListener('change', this._offersToggleHandler);
+    }
     this.getElement()
-      .querySelector('.event__section--offers')
-      .addEventListener('change', this._offersToggleHandler);
+      .querySelector('.event__field-group--time')
+      .addEventListener('change', this._durationCountHandler);
+  }
+
+  _setDatepicker() {
+    this._datepickerStart = flatpickr(
+      this.getElement().querySelector('.event__input--time-start'),
+      {
+        dateFormat: 'd/m/y H:i',
+        time_24hr: true,
+        enableTime: true,
+        defaultDate: new Date(this._data.dateFrom),
+        onChange: this._startDateChangeHandler,
+      },
+    );
+
+    this._datepickerEnd = flatpickr(
+      this.getElement().querySelector('.event__input--time-end'),
+      {
+        dateFormat: 'd/m/y H:i',
+        time_24hr: true,
+        enableTime: true,
+        defaultDate: new Date(this._data.dateTo),
+        onChange: this._endDateChangeHandler,
+      },
+    );
+  }
+
+  _durationCountHandler(evt) {
+    evt.preventDefault();
+    this.updateData({
+      durationTime: generateDurationTime(this._data.dateFrom, this._data.dateTo),
+      isSubmitDisabled: dayjs(this._data.dateTo).diff(dayjs(this._data.dateFrom)) < 0,
+    });
   }
 
   _destinationInputHandler(evt) {
@@ -291,6 +346,18 @@ export default class FormWaipoint extends SmartView {
     }, true);
   }
 
+  _startDateChangeHandler([userDate]) {
+    this.updateData({
+      dateFrom: userDate,
+    });
+  }
+
+  _endDateChangeHandler([userDate]) {
+    this.updateData({
+      dateTo: userDate,
+    });
+  }
+
   _typeChangeHandler(evt) {
     evt.preventDefault();
     this.updateData({
@@ -325,6 +392,7 @@ export default class FormWaipoint extends SmartView {
       {
         isOffer: waypoint.Offer.offers.length !== 0,
         isDestination: waypoint.destination.trim() !== String(),
+        isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0,
       },
     );
   }
@@ -334,6 +402,7 @@ export default class FormWaipoint extends SmartView {
 
     delete data.isOffer;
     delete data.isDestination;
+    delete data.isSubmitDisabled;
 
     return data;
   }

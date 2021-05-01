@@ -4,7 +4,7 @@ import NoWaypointView from '../view/no-waypoints.js';
 import WaypointPresenter from './waypoint.js';
 import {updateItem} from '../utils/common.js';
 import {render, RenderPosition} from '../utils/render.js';
-import {sortTime, sortPrice} from '../utils/waypoint.js';
+import {sortTime, sortPrice, sortDate} from '../utils/waypoint.js';
 import {SortType} from '../const.js';
 
 export default class Trip {
@@ -53,7 +53,7 @@ export default class Trip {
         this._waypoints.sort(sortPrice);
         break;
       default:
-        this._waypoints = this._sourcedWaypoints.slice();
+        this._waypoints = this._sourcedWaypoints.slice().sort(sortDate);
     }
     this._currentSortType = sortType;
   }
