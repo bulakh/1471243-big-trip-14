@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
 import {nanoid} from 'nanoid';
 import {TYPES, DESTINATIONS, TITLES_OFFERS} from '../const.js';
 import {getRandomInteger} from '../utils/common.js';
+import {generateDurationTime} from '../utils/waypoint.js';
 import {generateChiefOffer} from './offer.js';
 
 
@@ -57,29 +57,6 @@ const generateDateTo = (date) => {
   const minuteAdd = getRandomInteger(0, MAX_MINUTE_ADD);
 
   return dayjs(date).add(daysAdd, 'day').add(hourAdd, 'hour').add(minuteAdd, 'minute');
-};
-
-const generateDurationTime = (start, end) => {
-  const MS_IN_HOUR = 3600000;
-  const MS_IN_DAY = 86400000;
-
-  dayjs.extend(duration);
-  dayjs.duration(100);
-
-  const differenceInMs = dayjs(end).diff(dayjs(start));
-
-  const difference = {
-    days: dayjs.duration(differenceInMs).days() + 'D ',
-    hours: dayjs.duration(differenceInMs).hours() + 'H ',
-    minutes: dayjs.duration(differenceInMs).minutes() + 'M',
-  };
-
-  if (differenceInMs < MS_IN_HOUR) {
-    return difference.minutes;
-  } else if (differenceInMs < MS_IN_DAY) {
-    return difference.hours + difference.minutes;
-  }
-  return difference.days + difference.hours + difference.minutes;
 };
 
 const generateDestination = () => {

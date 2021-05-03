@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 
 export const dayOfStartEvent = (dateFrom) => {return dayjs(dateFrom).format('D MMMM');};
 export const timeStart = (dateFrom) => {return dayjs(dateFrom).format('HH:mm');};
@@ -41,14 +42,50 @@ export const sortTime = (waypointA, waypointB) => {
 };
 
 export const sortPrice = (waypointA, waypointB) => {
-  const waypointAbasePrice = dayjs(waypointA.basePrice);
-  const waypointBbasePrice = dayjs(waypointB.basePrice);
+  const waypointAbasePrice = waypointA.basePrice;
+  const waypointBbasePrice = waypointB.basePrice;
 
-  const weight = getWeightForNullCount(waypointA.basePrice, waypointB.basePrice);
+  const weight = getWeightForNullCount(waypointAbasePrice, waypointBbasePrice);
 
   if (weight !== null) {
     return weight;
   }
 
   return waypointBbasePrice - waypointAbasePrice;
+};
+
+export const sortDate = (waypointA, waypointB) => {
+  const waypointAdateFrom = waypointA.dateFrom;
+  const waypointBbdateFrom = waypointB.dateFrom;
+
+  const weight = getWeightForNullCount(waypointAdateFrom, waypointBbdateFrom);
+
+  if (weight !== null) {
+    return weight;
+  }
+
+  return waypointAdateFrom - waypointBbdateFrom;
+};
+
+export const generateDurationTime = (start, end) => {
+  const MS_IN_HOUR = 3600000;
+  const MS_IN_DAY = 86400000;
+
+  dayjs.extend(duration);
+  dayjs.duration(100);
+
+  const differenceInMs = dayjs(end).diff(dayjs(start));
+
+  const difference = {
+    days: dayjs.duration(differenceInMs).days() + 'D ',
+    hours: dayjs.duration(differenceInMs).hours() + 'H ',
+    minutes: dayjs.duration(differenceInMs).minutes() + 'M',
+  };
+
+  if (differenceInMs < MS_IN_HOUR) {
+    return difference.minutes;
+  } else if (differenceInMs < MS_IN_DAY) {
+    return difference.hours + difference.minutes;
+  }
+  return difference.days + difference.hours + difference.minutes;
 };
