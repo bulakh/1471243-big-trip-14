@@ -69,12 +69,6 @@ const renderRollupButton = (edit) => {
     : '';
 };
 
-const checkSubmitDisabled = (isSubmitDisabled) => {
-  return isSubmitDisabled
-    ? 'disabled'
-    : '';
-};
-
 const createSectionDestination = (isDestination, DestinationInformation, pictures) => {
   return isDestination
     ? `<section class="event__section  event__section--destination">
@@ -119,8 +113,6 @@ const createFormEventTemplate = (data, editForm) => {
 
   const sectionOffer = createSectionOffer(isOffer, offers);
   const sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
-  const isDisabled = checkSubmitDisabled(isSubmitDisabled);
-
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -166,7 +158,7 @@ const createFormEventTemplate = (data, editForm) => {
           <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled}>Save</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
         <button class="event__reset-btn" type="reset">${editTemplateCancel}</button>
         ${editRollupButton}
       </header>
