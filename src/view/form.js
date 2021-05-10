@@ -1,12 +1,16 @@
 import SmartView from './smart.js';
 import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard, generateDurationTime} from '../utils/waypoint.js';
+import {timeStartOpenCard, timeEndOpenCard, generateDurationTime, checkPrice} from '../utils/waypoint.js';
+import {findDueOffer, findDueDestination} from '../utils/common.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
-
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
+import he from 'he';
 
 const renderPictures = (information) => {
+  if (!information) {
+    throw new Error('We have not this town!');
+  }
   const pictures = information.pictures;
   const imgItems = new Array;
   for (const picture of pictures) {
@@ -97,8 +101,7 @@ const createSectionOffer = (isOffer, offers) => {
 };
 
 const createFormEventTemplate = (data, editForm) => {
-
-  const {type, id, destination, basePrice, dateFrom, dateTo, Offer, DestinationInformation, isOffer, isDestination, isSubmitDisabled} = data;
+  const {type, id, destination, basePrice, dateFrom, dateTo, isOffer, isDestination, isSubmitDisabled, Offer, DestinationInformation} = data;
 
   const typeTemplate = createTypeEvent(type, id);
   const destinationTemplate = createNameDestination();
@@ -108,11 +111,18 @@ const createFormEventTemplate = (data, editForm) => {
   const editTemplateCancel = toggleEditCancelButton(editForm);
   const editRollupButton = renderRollupButton(editForm);
 
-  const offers = createOffer(Offer.offers, type);
-  const pictures = renderPictures(DestinationInformation);
+  let sectionOffer;
+  let sectionDestination;
 
-  const sectionOffer = createSectionOffer(isOffer, offers);
-  const sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
+  if (Offer) {
+    const offers = createOffer(Offer.offers, type);
+    sectionOffer = createSectionOffer(isOffer, offers);
+  }
+
+  if (DestinationInformation) {
+    const pictures = renderPictures(DestinationInformation);
+    sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
+  }
 
   return `<li class="trip-events__item">
     <form class="event event--edit" action="#" method="post">
@@ -136,7 +146,7 @@ const createFormEventTemplate = (data, editForm) => {
           <label class="event__label  event__type-output" for="event-destination-${id}">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destination}" list="destination-list-${id}">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${he.encode(destination)}" list="destination-list-${id}">
           <datalist id="destination-list-${id}">
             ${destinationTemplate}
           </datalist>
@@ -155,7 +165,7 @@ const createFormEventTemplate = (data, editForm) => {
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${id}" type="text" name="event-price" value="${basePrice}">
+          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${checkPrice(basePrice)}">
         </div>
 
         <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
@@ -171,30 +181,40 @@ const createFormEventTemplate = (data, editForm) => {
   </li>`;
 };
 
-export default class FormWaipoint extends SmartView {
-  constructor(waypoint = EMPTY_WAYPOINT, EDIT_FORM, allWaypoints) {
+export default class FormWaypoint extends SmartView {
+  constructor(waypoint = EMPTY_WAYPOINT, offersModel, destinationsModel, EDIT_FORM) {
     super();
-    this._data = FormWaipoint.parseWaypointToData(waypoint);
+
+    this._dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
+    this._dueDestination = findDueDestination(destinationsModel.getDestinations(), waypoint.destination);
+
+    this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination);
     this._editForm = EDIT_FORM;
-    this._allWaypoints = allWaypoints;
+
+    this._offersModel = offersModel;
+    this._destinationsModel = destinationsModel;
+
     this._datepickerStart = null;
     this._datepickerEnd = null;
 
-    this._formSubmitHandler = this._formSubmitHandler.bind(this);
     this._backToCardClickHandler = this._backToCardClickHandler.bind(this);
+    this._formDeleteClickHandler = this._formDeleteClickHandler.bind(this);
 
     this._destinationInputHandler = this._destinationInputHandler.bind(this);
     this._destinationChangeHandler = this._destinationChangeHandler.bind(this);
-    this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._typeChangeHandler = this._typeChangeHandler.bind(this);
+    this._offersChangeHandler = this._offersChangeHandler.bind(this);
     this._offersToggleHandler = this._offersToggleHandler.bind(this);
     this._startDateChangeHandler = this._startDateChangeHandler.bind(this);
     this._endDateChangeHandler = this._endDateChangeHandler.bind(this);
     this._durationCountHandler = this._durationCountHandler.bind(this);
+    this._priceChangeHandler = this._priceChangeHandler.bind(this);
+    this._formSubmitHandler = this._formSubmitHandler.bind(this);
 
     this._setInnerHandlers();
     this._setDatepicker();
   }
+
 
   getTemplate() {
     return createFormEventTemplate(this._data, this._editForm);
@@ -202,7 +222,7 @@ export default class FormWaipoint extends SmartView {
 
   reset(waypoint) {
     this.updateData(
-      FormWaipoint.parseWaypointToData(waypoint),
+      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination),
     );
   }
 
@@ -219,13 +239,13 @@ export default class FormWaipoint extends SmartView {
       .addEventListener('change', this._destinationChangeHandler);
     this.getElement()
       .querySelector('.event__type-group')
+      .addEventListener('change', this._typeChangeHandler);
+    this.getElement()
+      .querySelector('.event__type-group')
       .addEventListener('change', this._offersChangeHandler);
     this.getElement()
       .querySelector('.event__input--destination')
       .addEventListener('input', this._destinationInputHandler);
-    this.getElement()
-      .querySelector('.event__type-group')
-      .addEventListener('change', this._typeChangeHandler);
     if (this._data.isOffer) {
       this.getElement()
         .querySelector('.event__section--offers')
@@ -234,6 +254,9 @@ export default class FormWaipoint extends SmartView {
     this.getElement()
       .querySelector('.event__field-group--time')
       .addEventListener('change', this._durationCountHandler);
+    this.getElement()
+      .querySelector('.event__input--price')
+      .addEventListener('change', this._priceChangeHandler);
   }
 
   _setDatepicker() {
@@ -278,49 +301,49 @@ export default class FormWaipoint extends SmartView {
   _destinationChangeHandler(evt) {
     evt.preventDefault();
 
-    const findDestinationWaypointHandler = (elem) => {
-      if (elem.destination === evt.target.value) {
-        return elem.DestinationInformation;
+    const findDestinationHandler = (elem) => {
+      if (elem.name === evt.target.value) {
+        return elem;
       }
     };
 
-    const findedDestinationWaypoint = this._allWaypoints.find(findDestinationWaypointHandler);
+    const findedDestination = this._destinationsModel.getDestinations().find(findDestinationHandler);
 
     this.updateData({
       DestinationInformation: Object.assign(
         {},
-        this._data.DestinationInformation,
+        this._dueDestination,
         {
           name: evt.target.value,
-          description: findedDestinationWaypoint ? findedDestinationWaypoint.DestinationInformation.description : '',
-          pictures: findedDestinationWaypoint ? findedDestinationWaypoint.DestinationInformation.pictures : [],
+          description: findedDestination ? findedDestination.description : '',
+          pictures: findedDestination ? findedDestination.pictures : [],
         },
       ),
-      isDestination: findedDestinationWaypoint,
+      isDestination: findedDestination,
     });
   }
 
   _offersChangeHandler(evt) {
     evt.preventDefault();
 
-    const findTypeWaypointHandler = (elem) => {
+    const findTypeHandler = (elem) => {
       if (elem.type === evt.target.value) {
-        return elem.Offer;
+        return elem;
       }
     };
 
-    const findedTypeWaypoint = this._allWaypoints.find(findTypeWaypointHandler);
+    const findedType = this._offersModel.getOffers().find(findTypeHandler);
 
     this.updateData({
       Offer: Object.assign(
         {},
-        this._data.Offer,
+        this._dueOffer,
         {
           type: evt.target.value,
-          offers: findedTypeWaypoint ? findedTypeWaypoint.Offer.offers : [],
+          offers: findedType ? findedType.offers : [],
         },
       ),
-      isOffer: findedTypeWaypoint ? findedTypeWaypoint.Offer.offers.length !== 0 : false,
+      isOffer: findedType ? findedType.offers.length !== 0 : false,
     });
   }
 
@@ -330,9 +353,9 @@ export default class FormWaipoint extends SmartView {
     this.updateData({
       Offer: Object.assign(
         {},
-        this._data.Offer,
+        this._dueOffer,
         {
-          [evt.target.dataset.id]: this._data.Offer.offers.map((el) => {if (evt.target.dataset.id === el.id) {el.isChecked = !el.isChecked;}}),
+          [evt.target.dataset.id]: this._dueOffer.offers.map((el) => {if (evt.target.dataset.id === el.id) {el.isChecked = !el.isChecked;}}),
         },
       ),
     }, true);
@@ -357,6 +380,12 @@ export default class FormWaipoint extends SmartView {
     });
   }
 
+  _priceChangeHandler(evt) {
+    this.updateData({
+      basePrice: evt.target.value,
+    });
+  }
+
   _backToCardClickHandler(evt) {
     evt.preventDefault();
     this._callback.backClick();
@@ -364,7 +393,12 @@ export default class FormWaipoint extends SmartView {
 
   _formSubmitHandler(evt) {
     evt.preventDefault();
-    this._callback.formSubmit(FormWaipoint.parseDataToWaypoint(this._data));
+    this._callback.formSubmit(FormWaypoint.parseDataToWaypoint(this._data));
+  }
+
+  _formDeleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(FormWaypoint.parseDataToWaypoint(this._data));
   }
 
   setFormSubmitHandler(callback) {
@@ -374,17 +408,26 @@ export default class FormWaipoint extends SmartView {
 
   setCardtoBackHandler(callback) {
     this._callback.backClick = callback;
-    this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
+    if (this._editForm) {
+      this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
+    }
   }
 
-  static parseWaypointToData(waypoint) {
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
+  }
+
+  static parseWaypointToData(waypoint, dueOffer, dueDestination) {
     return Object.assign(
       {},
       waypoint,
       {
-        isOffer: waypoint.Offer.offers.length !== 0,
-        isDestination: waypoint.destination.trim() !== String(),
+        isOffer: dueOffer !== undefined ? dueOffer.offers.length !== 0 : false,
+        isDestination: dueDestination !== undefined ? dueDestination !== String() : false,
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0,
+        Offer: dueOffer,
+        DestinationInformation: dueDestination,
       },
     );
   }
