@@ -11,7 +11,7 @@ import {render, RenderPosition} from './utils/render.js';
 import NavigationView from './view/navigation.js';
 
 
-const WAYPOINT_COUNT = 20;
+const WAYPOINT_COUNT = 10;
 const EDIT_FORM = true;
 
 const waypoints = new Array(WAYPOINT_COUNT).fill().map(generateWaypoint);

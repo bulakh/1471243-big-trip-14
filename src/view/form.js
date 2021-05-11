@@ -1,6 +1,6 @@
 import SmartView from './smart.js';
-import {TYPES, DESTINATIONS, EMPTY_WAYPOINT} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard, generateDurationTime, checkPrice} from '../utils/waypoint.js';
+import {TYPES, EMPTY_WAYPOINT} from '../const.js';
+import {timeStartOpenCard, timeEndOpenCard, generateDurationTime, checkPrice, getAllNameDestinations} from '../utils/waypoint.js';
 import {findDueOffer, findDueDestination} from '../utils/common.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
@@ -8,9 +8,6 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 import he from 'he';
 
 const renderPictures = (information) => {
-  if (!information) {
-    throw new Error('We have not this town!');
-  }
   const pictures = information.pictures;
   const imgItems = new Array;
   for (const picture of pictures) {
@@ -32,8 +29,10 @@ const createTypeEvent = (currentType, id) => {
   </div>`).join('');
 };
 
-const createNameDestination = () => {
-  return DESTINATIONS.map((destination) => `<option value="${destination}"></option>`).join('');
+const createNameDestination = (destinationsModel) => {
+  const allDestinations = getAllNameDestinations(destinationsModel);
+
+  return allDestinations.map((destination) => `<option value="${destination}"></option>`).join('');
 };
 
 const createOffer = (offers, type) => {
@@ -73,9 +72,8 @@ const renderRollupButton = (edit) => {
     : '';
 };
 
-const createSectionDestination = (isDestination, DestinationInformation, pictures) => {
-  return isDestination
-    ? `<section class="event__section  event__section--destination">
+const createSectionDestination = (DestinationInformation, pictures) => {
+  return `<section class="event__section  event__section--destination">
       <h3 class="event__section-title  event__section-title--destination">Destination</h3>
       <p class="event__destination-description">${DestinationInformation.description}</p>
 
@@ -84,27 +82,24 @@ const createSectionDestination = (isDestination, DestinationInformation, picture
         ${pictures}
         </div>
       </div>
-    </section>`
-    : '';
+    </section>`;
 };
 
-const createSectionOffer = (isOffer, offers) => {
-  return isOffer
-    ? `<section class="event__section  event__section--offers">
+const createSectionOffer = (offers) => {
+  return `<section class="event__section  event__section--offers">
       <h3 class="event__section-title  event__section-title--offers">Offers</h3>
 
       <div class="event__available-offers">
         ${offers}
       </div>
-    </section>`
-    : '';
+    </section>`;
 };
 
-const createFormEventTemplate = (data, editForm) => {
+const createFormEventTemplate = (data, editForm, destinationsModel) => {
   const {type, id, destination, basePrice, dateFrom, dateTo, isOffer, isDestination, isSubmitDisabled, Offer, DestinationInformation} = data;
 
   const typeTemplate = createTypeEvent(type, id);
-  const destinationTemplate = createNameDestination();
+  const destinationTemplate = createNameDestination(destinationsModel);
   const timeStart = timeStartOpenCard(dateFrom);
   const timeEnd = timeEndOpenCard(dateTo);
 
@@ -114,14 +109,14 @@ const createFormEventTemplate = (data, editForm) => {
   let sectionOffer;
   let sectionDestination;
 
-  if (Offer) {
+  if(isOffer) {
     const offers = createOffer(Offer.offers, type);
-    sectionOffer = createSectionOffer(isOffer, offers);
+    sectionOffer = createSectionOffer(offers);
   }
 
-  if (DestinationInformation) {
+  if (isDestination) {
     const pictures = renderPictures(DestinationInformation);
-    sectionDestination = createSectionDestination(isDestination, DestinationInformation, pictures);
+    sectionDestination = createSectionDestination(DestinationInformation, pictures);
   }
 
   return `<li class="trip-events__item">
@@ -173,9 +168,8 @@ const createFormEventTemplate = (data, editForm) => {
         ${editRollupButton}
       </header>
       <section class="event__details">
-        ${sectionOffer}
-
-        ${sectionDestination}
+        ${isOffer ? sectionOffer : ''}
+        ${isDestination ? sectionDestination : ''}
       </section>
     </form>
   </li>`;
@@ -193,6 +187,7 @@ export default class FormWaypoint extends SmartView {
 
     this._offersModel = offersModel;
     this._destinationsModel = destinationsModel;
+
 
     this._datepickerStart = null;
     this._datepickerEnd = null;
@@ -217,7 +212,7 @@ export default class FormWaypoint extends SmartView {
 
 
   getTemplate() {
-    return createFormEventTemplate(this._data, this._editForm);
+    return createFormEventTemplate(this._data, this._editForm, this._destinationsModel);
   }
 
   reset(waypoint) {
@@ -230,6 +225,7 @@ export default class FormWaypoint extends SmartView {
     this._setInnerHandlers();
     this.setFormSubmitHandler(this._callback.formSubmit);
     this.setCardtoBackHandler(this._callback.backClick);
+    this.setDeleteClickHandler(this._callback.deleteClick);
     this._setDatepicker();
   }
 
@@ -307,6 +303,8 @@ export default class FormWaypoint extends SmartView {
       }
     };
 
+    const allDestinations = getAllNameDestinations(this._destinationsModel);
+
     const findedDestination = this._destinationsModel.getDestinations().find(findDestinationHandler);
 
     this.updateData({
@@ -320,6 +318,7 @@ export default class FormWaypoint extends SmartView {
         },
       ),
       isDestination: findedDestination,
+      isSubmitDisabled: allDestinations.indexOf(evt.target.value) < 0,
     });
   }
 
@@ -423,9 +422,9 @@ export default class FormWaypoint extends SmartView {
       {},
       waypoint,
       {
-        isOffer: dueOffer !== undefined ? dueOffer.offers.length !== 0 : false,
-        isDestination: dueDestination !== undefined ? dueDestination !== String() : false,
-        isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0,
+        isOffer: dueOffer ? dueOffer.offers.length !== 0 : false,
+        isDestination: dueDestination ? dueDestination !== '' : false,
+        isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
         Offer: dueOffer,
         DestinationInformation: dueDestination,
       },

@@ -5,8 +5,8 @@ export const DESTINATIONS = ['Paris', 'Rome', 'Berlin', 'Lisbon', 'Barcelona', '
 export const EMPTY_WAYPOINT = {
   id: '',
   type: TYPES[0],
-  destination:  DESTINATIONS[0],
-  basePrice: 100,
+  destination:  '',
+  basePrice: '',
   dateFrom : new Date(),
   dateTo: new Date(),
   durationTime: '',

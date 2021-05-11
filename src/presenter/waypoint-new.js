@@ -58,7 +58,12 @@ export default class WaypointNew {
     this._changeData(
       UserAction.ADD_WAYPOINT,
       UpdateType.MINOR,
-      Object.assign({id: nanoid()}, waypoint),
+      Object.assign(
+        {},
+        waypoint,
+        {
+          id: nanoid(),
+        }),
     );
     this.destroy();
   }

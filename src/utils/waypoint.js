@@ -113,3 +113,14 @@ export const checkPrice = (price) => {
   }
   return countPrice;
 };
+
+export const getAllNameDestinations = (destinationsModel) => {
+  const destinations = destinationsModel.getDestinations();
+  const allDestinations = new Array();
+  for (const destination of destinations) {
+    const map = new Map(Object.entries(destination));
+    const name = map.get('name');
+    allDestinations.push(name);
+  }
+  return allDestinations;
+};
