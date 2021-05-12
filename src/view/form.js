@@ -5,7 +5,6 @@ import {findDueOffer, findDueDestination} from '../utils/common.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
-import he from 'he';
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
@@ -32,7 +31,7 @@ const createTypeEvent = (currentType, id) => {
 const createNameDestination = (destinationsModel) => {
   const allDestinations = getAllNameDestinations(destinationsModel);
 
-  return allDestinations.map((destination) => `<option value="${destination}"></option>`).join('');
+  return allDestinations.map((destination) => `<option value="${destination[0].toUpperCase() + destination.slice(1)}"></option>`).join('');
 };
 
 const createOffer = (offers, type) => {
@@ -141,7 +140,7 @@ const createFormEventTemplate = (data, editForm, destinationsModel) => {
           <label class="event__label  event__type-output" for="event-destination-${id}">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${he.encode(destination)}" list="destination-list-${id}">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destination}" list="destination-list-${id}">
           <datalist id="destination-list-${id}">
             ${destinationTemplate}
           </datalist>
@@ -181,8 +180,9 @@ export default class FormWaypoint extends SmartView {
 
     this._dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
     this._dueDestination = findDueDestination(destinationsModel.getDestinations(), waypoint.destination);
+    // this._offerIdsIsChecked = getOfferIdsIsChecked(this._dueOffer);
 
-    this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination);
+    this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, EDIT_FORM);
     this._editForm = EDIT_FORM;
 
     this._offersModel = offersModel;
@@ -298,7 +298,7 @@ export default class FormWaypoint extends SmartView {
     evt.preventDefault();
 
     const findDestinationHandler = (elem) => {
-      if (elem.name === evt.target.value) {
+      if (elem.name.toLowerCase() === evt.target.value.toLowerCase()) {
         return elem;
       }
     };
@@ -318,7 +318,7 @@ export default class FormWaypoint extends SmartView {
         },
       ),
       isDestination: findedDestination,
-      isSubmitDisabled: allDestinations.indexOf(evt.target.value) < 0,
+      isSubmitDisabled: allDestinations.indexOf(evt.target.value.toLowerCase()) < 0,
     });
   }
 
@@ -331,7 +331,7 @@ export default class FormWaypoint extends SmartView {
       }
     };
 
-    const findedType = this._offersModel.getOffers().find(findTypeHandler);
+    this._dueOffer = this._offersModel.getOffers().find(findTypeHandler);
 
     this.updateData({
       Offer: Object.assign(
@@ -339,22 +339,31 @@ export default class FormWaypoint extends SmartView {
         this._dueOffer,
         {
           type: evt.target.value,
-          offers: findedType ? findedType.offers : [],
+          offers: this._dueOffer.offers.map((offer) => offer.isChecked = false) ? this._dueOffer.offers : [],
         },
       ),
-      isOffer: findedType ? findedType.offers.length !== 0 : false,
+      isOffer: this._dueOffer ? this._dueOffer.offers.length !== 0 : false,
+      // offerIds: getOfferIdsIsChecked(this._dueOffer),
     });
   }
 
   _offersToggleHandler(evt) {
-    evt.preventDefault();
+    // const offersIsChecked = this._data.offerIds;
 
+    evt.preventDefault();
     this.updateData({
       Offer: Object.assign(
         {},
         this._dueOffer,
         {
-          [evt.target.dataset.id]: this._dueOffer.offers.map((el) => {if (evt.target.dataset.id === el.id) {el.isChecked = !el.isChecked;}}),
+          [evt.target.dataset.id]: this._dueOffer.offers.map((el) => {if (evt.target.dataset.id === el.id) {
+            el.isChecked = !el.isChecked;
+            // if (el.isChecked) {
+            //   offersIsChecked.push(el.id);
+            // } else {
+            //   offersIsChecked.splice(offersIsChecked.indexOf(el.id), 1);
+            // }
+          }}),
         },
       ),
     }, true);
@@ -417,7 +426,10 @@ export default class FormWaypoint extends SmartView {
     this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
   }
 
-  static parseWaypointToData(waypoint, dueOffer, dueDestination) {
+  static parseWaypointToData(waypoint, dueOffer, dueDestination, editForm) {
+    if (!editForm) {
+      dueOffer.offers.map((offer) => offer.isChecked = false);
+    }
     return Object.assign(
       {},
       waypoint,
@@ -427,6 +439,7 @@ export default class FormWaypoint extends SmartView {
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
         Offer: dueOffer,
         DestinationInformation: dueDestination,
+        // offerIds: offerIdsIsChecked,
       },
     );
   }

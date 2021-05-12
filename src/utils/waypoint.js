@@ -120,7 +120,7 @@ export const getAllNameDestinations = (destinationsModel) => {
   for (const destination of destinations) {
     const map = new Map(Object.entries(destination));
     const name = map.get('name');
-    allDestinations.push(name);
+    allDestinations.push(name.toLowerCase());
   }
   return allDestinations;
 };

@@ -1,7 +1,6 @@
 import AbstractView from './abstract.js';
 import {dayOfStartEvent, timeStart, timeEnd, checkPrice} from '../utils/waypoint.js';
 import {findDueOffer} from '../utils/common.js';
-import he from 'he';
 
 const createWaypointTemplate = (waypoint = {}, offersModel) => {
   const {basePrice, dateFrom, dateTo, durationTime, type, destination, isFavorite} = waypoint;
@@ -23,7 +22,7 @@ const createWaypointTemplate = (waypoint = {}, offersModel) => {
         <span class="event__offer-price">${price}</span>
       </li>`;
 
-      if (isChecked === true) {
+      if (isChecked) {
         offerItems.push(offerItem);
       }
     }
@@ -40,7 +39,7 @@ const createWaypointTemplate = (waypoint = {}, offersModel) => {
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
-      <h3 class="event__title">${type} ${he.encode(destination)}</h3>
+      <h3 class="event__title">${type} ${destination}</h3>
       <div class="event__schedule">
         <p class="event__time">
           <time class="event__start-time" datetime="${dateFrom}">${timeStart(dateFrom)}</time>

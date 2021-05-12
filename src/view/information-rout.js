@@ -1,7 +1,6 @@
 import AbstractView from './abstract.js';
 import {sortDate, timeStartHeader, timeEndHeader, checkPrice} from '../utils/waypoint.js';
 import {findDueOffer} from '../utils/common.js';
-import he from 'he';
 
 const getSumCost = (waypoints, offersModel) => {
   let priceCount = 0;
@@ -37,7 +36,7 @@ const createInformationRoutTemplate = (waypoints, offersModel) => {
 
   return `<section class="trip-main__trip-info  trip-info">
     <div class="trip-info__main">
-      <h1 class="trip-info__title">${he.encode(firstDestination)} &mdash; ${he.encode(secondDestination)} &mdash; ${he.encode(lastDestination)}</h1>
+      <h1 class="trip-info__title">${firstDestination} &mdash; ${secondDestination} &mdash; ${lastDestination}</h1>
 
       <p class="trip-info__dates">${startDay}&nbsp;&mdash;&nbsp;${lastDay}</p>
     </div>
