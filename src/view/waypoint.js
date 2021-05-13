@@ -1,8 +1,11 @@
 import AbstractView from './abstract.js';
-import {dayOfStartEvent, timeStart, timeEnd} from '../utils/waypoint.js';
+import {dayOfStartEvent, timeStart, timeEnd, checkPrice} from '../utils/waypoint.js';
+import {findDueOffer} from '../utils/common.js';
 
-const createWaypointTemplate = (waypoint = {}) => {
-  const {basePrice, dateFrom, dateTo, durationTime, type, Offer, destination, isFavorite} = waypoint;
+const createWaypointTemplate = (waypoint = {}, offersModel) => {
+  const {basePrice, dateFrom, dateTo, durationTime, type, destination, isFavorite} = waypoint;
+
+  const dueOffer = findDueOffer(offersModel.getOffers(), type);
 
   const renderOffers = (Offer) => {
     const eventOffers = Offer.offers;
@@ -19,7 +22,7 @@ const createWaypointTemplate = (waypoint = {}) => {
         <span class="event__offer-price">${price}</span>
       </li>`;
 
-      if (isChecked === true) {
+      if (isChecked) {
         offerItems.push(offerItem);
       }
     }
@@ -46,11 +49,11 @@ const createWaypointTemplate = (waypoint = {}) => {
         <p class="event__duration">${durationTime}</p>
       </div>
       <p class="event__price">
-        &euro;&nbsp;<span class="event__price-value">${basePrice}</span>
+        &euro;&nbsp;<span class="event__price-value">${checkPrice(basePrice)}</span>
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-       ${renderOffers(Offer)}
+       ${renderOffers(dueOffer)}
       </ul>
       <button class="event__favorite-btn ${favoriteClassName}" type="button">
         <span class="visually-hidden">Add to favorite</span>
@@ -66,16 +69,17 @@ const createWaypointTemplate = (waypoint = {}) => {
 };
 
 export default class Waypoint extends AbstractView {
-  constructor(waypoint) {
+  constructor(waypoint, offersModel) {
     super();
     this._waypoint = waypoint;
+    this._offersModel = offersModel;
 
     this._editClickHandler = this._editClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createWaypointTemplate(this._waypoint);
+    return createWaypointTemplate(this._waypoint, this._offersModel);
   }
 
   _editClickHandler(evt) {

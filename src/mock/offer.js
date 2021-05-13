@@ -1,5 +1,6 @@
 import {getRandomInteger} from '../utils/common.js';
 import {nanoid} from 'nanoid';
+import {TYPES, TITLES_OFFERS} from '../const.js';
 
 
 const generateOffer = (title) => {
@@ -20,10 +21,16 @@ const generateOffers = (titles) => {
   return offers;
 };
 
-export const generateChiefOffer = (type, titles) => {
+export const generateItemOffer = (type, titles) => {
   return {
     type: type,
     offers: generateOffers(titles),
   };
 };
+
+export const allOffers = new Array();
+for (const type of TYPES) {
+  const offer = generateItemOffer(type, TITLES_OFFERS);
+  allOffers.push(offer);
+}
 
