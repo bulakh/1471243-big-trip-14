@@ -79,14 +79,9 @@ export const sortDate = (waypointA, waypointB) => {
   return waypointAdateFrom - waypointBbdateFrom;
 };
 
-export const generateDurationTime = (start, end) => {
+export const getDiffToFormat = (differenceInMs) => {
   const MS_IN_HOUR = 3600000;
   const MS_IN_DAY = 86400000;
-
-  dayjs.extend(duration);
-  dayjs.duration(100);
-
-  const differenceInMs = dayjs(end).diff(dayjs(start));
 
   const difference = {
     days: dayjs.duration(differenceInMs).days() + 'D ',
@@ -102,6 +97,15 @@ export const generateDurationTime = (start, end) => {
   return difference.days + difference.hours + difference.minutes;
 };
 
+export const generateDurationTime = (start, end) => {
+  dayjs.extend(duration);
+  dayjs.duration(100);
+
+  const differenceInMs = dayjs(end).diff(dayjs(start));
+
+  return getDiffToFormat(differenceInMs);
+};
+
 export const isDatesEqual = (dateA, dateB) => {
   return (dateA === null && dateB === null) ? true : dayjs(dateA).isSame(dateB, 'day');
 };
@@ -111,7 +115,7 @@ export const checkPrice = (price) => {
   if (countPrice < 0) {
     return countPrice * (-1);
   }
-  return countPrice;
+  return parseInt(countPrice, 10);
 };
 
 export const getAllNameDestinations = (destinationsModel) => {

@@ -4,14 +4,15 @@ import {remove, render, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 
 export default class WaypointNew {
-  constructor(waypointsContainer, changeData, offersModel, destinationsModel) {
+  constructor(waypointsContainer, changeData, offersModel, destinationsModel,buttonNewEvent) {
     this._waypointsContainer = waypointsContainer;
     this._changeData = changeData;
     this._offersModel = offersModel;
     this._destinationsModel = destinationsModel;
+    this._destroyCallback = null;
 
     this._waypointEditComponent = null;
-    this._buttonNewEvent = document.querySelector('.trip-main__event-add-btn');
+    this._buttonNewEvent = buttonNewEvent;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
@@ -47,11 +48,11 @@ export default class WaypointNew {
   }
 
   addDisabled() {
-    this._buttonNewEvent.setAttribute('disabled', 'disabled');
+    this._buttonNewEvent.getElement().setAttribute('disabled', 'disabled');
   }
 
   removeDisabled() {
-    this._buttonNewEvent.removeAttribute('disabled', 'disabled');
+    this._buttonNewEvent.getElement().removeAttribute('disabled', 'disabled');
   }
 
   _handleFormSubmit(waypoint) {

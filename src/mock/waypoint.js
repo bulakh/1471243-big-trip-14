@@ -62,5 +62,6 @@ export const generateWaypoint = () => {
     dateTo,
     durationTime,
     isFavorite: Boolean(getRandomInteger(0, 1)),
+    offerIds: [],
   };
 };

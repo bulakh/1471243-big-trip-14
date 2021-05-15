@@ -7,10 +7,10 @@ import WaypointNewPresenter from './waypoint-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {sortTime, sortPrice, sortDate} from '../utils/waypoint.js';
 import {filter} from '../utils/filter.js';
-import {SortType, UpdateType, UserAction, FilterType} from '../const.js';
+import {SortType, UpdateType, UserAction} from '../const.js';
 
 export default class Trip {
-  constructor(tripContainer, informationContainer, waypointsModel, filterModel, offersModel, destinationsModel, EDIT_FORM) {
+  constructor(tripContainer, informationContainer, waypointsModel, filterModel, offersModel, destinationsModel, EDIT_FORM, buttonNewEvent) {
     this._waypointsModel = waypointsModel;
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
@@ -22,6 +22,7 @@ export default class Trip {
     this._editForm = EDIT_FORM;
     this._sortComponent = null;
     this._informationRoutComponent = null;
+    this._buttonNewEvent = buttonNewEvent;
 
     this._waypointListComponent = new PointsListView();
     this._noWaypointComponent = new NoWaypointView();
@@ -32,23 +33,34 @@ export default class Trip {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
 
-    this._waypointsModel.addObserver(this._handleModelEvent);
-    this._destinationsModel.addObserver(this._handleModelEvent);
-    this._offersModel.addObserver(this._handleModelEvent);
-    this._filterModel.addObserver(this._handleModelEvent);
-
-    this._waypointNewPresenter = new WaypointNewPresenter(this._waypointListComponent, this._handleViewAction, this._offersModel, this._destinationsModel);
+    this._waypointNewPresenter = new WaypointNewPresenter(this._waypointListComponent, this._handleViewAction, this._offersModel, this._destinationsModel, this._buttonNewEvent);
   }
 
   init() {
     render(this._tripContainer, this._waypointListComponent, RenderPosition.BEFOREEND);
 
+    this._waypointsModel.addObserver(this._handleModelEvent);
+    this._destinationsModel.addObserver(this._handleModelEvent);
+    this._offersModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
+
     this._renderTrip();
   }
 
-  createTask() {
-    this._currentSortType = SortType.DEFAULT;
-    this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+  destroy() {
+    this._clearTrip({resetSortType: true, destroyInformation: false});
+
+    remove(this._waypointListComponent);
+    remove(this._sortComponent);
+    remove(this._noWaypointComponent);
+
+    this._waypointsModel.removeObserver(this._handleModelEvent);
+    this._destinationsModel.removeObserver(this._handleModelEvent);
+    this._offersModel.removeObserver(this._handleModelEvent);
+    this._filterModel.removeObserver(this._handleModelEvent);
+  }
+
+  createWaypoint() {
     this._waypointNewPresenter.init();
   }
 
@@ -144,10 +156,8 @@ export default class Trip {
     render(this._informationContainer, this._informationRoutComponent, RenderPosition.AFTERBEGIN);
   }
 
-  _clearTrip({resetSortType = false} = {}) {
+  _clearTrip({resetSortType = false, destroyInformation = true} = {}) {
     this._waypointNewPresenter.destroy();
-
-    remove(this._informationRoutComponent);
     Object
       .values(this._waypointPresenter)
       .forEach((presenter) => presenter.destroy());
@@ -157,6 +167,10 @@ export default class Trip {
 
     if (resetSortType) {
       this._currentSortType = SortType.DEFAULT;
+    }
+
+    if (destroyInformation){
+      remove(this._informationRoutComponent);
     }
   }
 
