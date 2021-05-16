@@ -8,7 +8,6 @@ const generateOffer = (title) => {
     id: nanoid(),
     title: title,
     price: getRandomInteger(1, 10) + '0',
-    isChecked: Boolean(getRandomInteger(0, 1)),
   };
 };
 

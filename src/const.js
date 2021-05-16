@@ -11,6 +11,7 @@ export const EMPTY_WAYPOINT = {
   dateTo: new Date(),
   durationTime: '',
   isFavorite: false,
+  offerIds: [],
 };
 
 export const SortType = {
