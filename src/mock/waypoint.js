@@ -3,6 +3,7 @@ import {nanoid} from 'nanoid';
 import {TYPES, DESTINATIONS} from '../const.js';
 import {getRandomInteger} from '../utils/common.js';
 import {generateDurationTime} from '../utils/waypoint.js';
+import {allOffers} from './offer.js';
 
 const generateBasePrice = () => {
   const MAX_BASE_PRICE = 100;
@@ -46,6 +47,18 @@ const generateType = () => {
   return TYPES[randomIndex];
 };
 
+const generateOfferIds = (type, allOffers) => {
+  const offerIds = new Array();
+  allOffers.map((typeOffers) => {
+    if (typeOffers.type === type) {
+      typeOffers.offers.map((concreteOffer) => {
+        offerIds.push(concreteOffer.id);
+      });
+    }
+  });
+  return offerIds.splice(getRandomInteger(0, 5), getRandomInteger(1, 3));
+};
+
 export const generateWaypoint = () => {
   const dateFrom = generateDateFrom();
   const dateTo = generateDateTo(dateFrom);
@@ -62,5 +75,6 @@ export const generateWaypoint = () => {
     dateTo,
     durationTime,
     isFavorite: Boolean(getRandomInteger(0, 1)),
+    offerIds: generateOfferIds(typeEvent, allOffers),
   };
 };

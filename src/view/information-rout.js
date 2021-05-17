@@ -7,6 +7,7 @@ const getSumCost = (waypoints, offersModel) => {
   for (const waypoint of waypoints) {
     const map = new Map(Object.entries(waypoint));
     const price = map.get('basePrice');
+    const offerIds = map.get('offerIds');
     priceCount+= Number(price);
 
     const dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
@@ -14,11 +15,13 @@ const getSumCost = (waypoints, offersModel) => {
     const offers = dueOffer.offers;
     for (const offer of offers) {
       const mapOffer = new Map(Object.entries(offer));
-      const isChecked = mapOffer.get('isChecked');
+      const id = mapOffer.get('id');
       const priceOffer = mapOffer.get('price');
-      if (isChecked) {
-        priceCount+= Number(priceOffer);
-      }
+      offerIds.map((offerId) => {
+        if (offerId === id) {
+          priceCount+= Number(priceOffer);
+        }
+      });
     }
   }
   return priceCount;

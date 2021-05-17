@@ -1,31 +1,28 @@
 import AbstractView from './abstract.js';
 import {dayOfStartEvent, timeStart, timeEnd, checkPrice} from '../utils/waypoint.js';
-import {findDueOffer} from '../utils/common.js';
 
 const createWaypointTemplate = (waypoint = {}, offersModel) => {
-  const {basePrice, dateFrom, dateTo, durationTime, type, destination, isFavorite} = waypoint;
+  const {basePrice, dateFrom, dateTo, durationTime, type, destination, isFavorite, offerIds} = waypoint;
 
-  const dueOffer = findDueOffer(offersModel.getOffers(), type);
-
-  const renderOffers = (Offer) => {
-    const eventOffers = Offer.offers;
+  const renderOffers = (type, offerIds, offersModel) => {
     const offerItems = new Array;
-    for (const eventOffer of eventOffers) {
-      const map = new Map(Object.entries(eventOffer));
-      const title = map.get('title');
-      const price = map.get('price');
-      const isChecked = map.get('isChecked');
+    offerIds.map((offerId) => {
+      offersModel.getOffers().map((typeOffer) => {
+        if (typeOffer.type === type) {
+          typeOffer.offers.map((concreteOffer) => {
+            if (concreteOffer.id === offerId) {
 
-      const offerItem = `<li class="event__offer">
-        <span class="event__offer-title">${title}</span>
-        &plus;&euro;&nbsp;
-        <span class="event__offer-price">${price}</span>
-      </li>`;
-
-      if (isChecked) {
-        offerItems.push(offerItem);
-      }
-    }
+              const offerItem = `<li class="event__offer">
+                <span class="event__offer-title">${concreteOffer.title}</span>
+                &plus;&euro;&nbsp;
+                <span class="event__offer-price">${concreteOffer.price}</span>
+              </li>`;
+              offerItems.push(offerItem);
+            }
+          });
+        }
+      });
+    });
     return offerItems.join(' ');
   };
 
@@ -53,7 +50,7 @@ const createWaypointTemplate = (waypoint = {}, offersModel) => {
       </p>
       <h4 class="visually-hidden">Offers:</h4>
       <ul class="event__selected-offers">
-       ${renderOffers(dueOffer)}
+       ${renderOffers(type, offerIds, offersModel)}
       </ul>
       <button class="event__favorite-btn ${favoriteClassName}" type="button">
         <span class="visually-hidden">Add to favorite</span>

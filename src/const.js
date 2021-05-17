@@ -6,11 +6,12 @@ export const EMPTY_WAYPOINT = {
   id: '',
   type: TYPES[0],
   destination:  '',
-  basePrice: '',
+  basePrice: 0,
   dateFrom : new Date(),
   dateTo: new Date(),
   durationTime: '',
   isFavorite: false,
+  offerIds: [],
 };
 
 export const SortType = {
@@ -37,3 +38,8 @@ export const FilterType = {
   PAST: 'past',
 };
 
+export const MenuItem = {
+  TABLE: 'TABLE',
+  STATS: 'STATS',
+  ADD_EVENT: 'ADD_EVENT',
+};

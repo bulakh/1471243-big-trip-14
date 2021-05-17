@@ -34,19 +34,21 @@ const createNameDestination = (destinationsModel) => {
   return allDestinations.map((destination) => `<option value="${destination[0].toUpperCase() + destination.slice(1)}"></option>`).join('');
 };
 
-const createOffer = (offers, type) => {
+const createOffer = (offers, type, offerIds) => {
   const offerItems = new Array;
   for (const offer of offers) {
     const map = new Map(Object.entries(offer));
     const title = map.get('title');
     const price = map.get('price');
-    const isChecked = map.get('isChecked');
-    const idOffer = map.get('id');
+    let isChecked = false;
+    const id = map.get('id');
+
+    offerIds.map((idOffer) => {if (idOffer === id) {isChecked = true;}});
 
     const offerItem = `<div class="event__offer-selector">
-      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${idOffer}"
-      data-id="${idOffer}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
-      <label class="event__offer-label" for="event-offer-${type}-${idOffer}">
+      <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${id}"
+      data-id="${id}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
+      <label class="event__offer-label" for="event-offer-${type}-${id}">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
         <span class="event__offer-price">${price}</span>
@@ -94,8 +96,8 @@ const createSectionOffer = (offers) => {
     </section>`;
 };
 
-const createFormEventTemplate = (data, editForm, destinationsModel) => {
-  const {type, id, destination, basePrice, dateFrom, dateTo, isOffer, isDestination, isSubmitDisabled, Offer, DestinationInformation} = data;
+const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) => {
+  const {type, id, destination, basePrice, dateFrom, dateTo, isOffer, isDestination, isSubmitDisabled, DestinationInformation, offerIds} = data;
 
   const typeTemplate = createTypeEvent(type, id);
   const destinationTemplate = createNameDestination(destinationsModel);
@@ -109,7 +111,7 @@ const createFormEventTemplate = (data, editForm, destinationsModel) => {
   let sectionDestination;
 
   if(isOffer) {
-    const offers = createOffer(Offer.offers, type);
+    const offers = createOffer(dueOffer.offers, type, offerIds);
     sectionOffer = createSectionOffer(offers);
   }
 
@@ -180,7 +182,6 @@ export default class FormWaypoint extends SmartView {
 
     this._dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
     this._dueDestination = findDueDestination(destinationsModel.getDestinations(), waypoint.destination);
-    // this._offerIdsIsChecked = getOfferIdsIsChecked(this._dueOffer);
 
     this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, EDIT_FORM);
     this._editForm = EDIT_FORM;
@@ -212,12 +213,12 @@ export default class FormWaypoint extends SmartView {
 
 
   getTemplate() {
-    return createFormEventTemplate(this._data, this._editForm, this._destinationsModel);
+    return createFormEventTemplate(this._data, this._editForm, this._dueOffer, this._destinationsModel);
   }
 
   reset(waypoint) {
     this.updateData(
-      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination),
+      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, this._editForm),
     );
   }
 
@@ -334,38 +335,20 @@ export default class FormWaypoint extends SmartView {
     this._dueOffer = this._offersModel.getOffers().find(findTypeHandler);
 
     this.updateData({
-      Offer: Object.assign(
-        {},
-        this._dueOffer,
-        {
-          type: evt.target.value,
-          offers: this._dueOffer.offers.map((offer) => offer.isChecked = false) ? this._dueOffer.offers : [],
-        },
-      ),
       isOffer: this._dueOffer ? this._dueOffer.offers.length !== 0 : false,
-      // offerIds: getOfferIdsIsChecked(this._dueOffer),
+      offerIds: [],
     });
   }
 
   _offersToggleHandler(evt) {
-    // const offersIsChecked = this._data.offerIds;
+    const offersIsChecked = this._data.offerIds;
+    const currentOfferId = evt.target.dataset.id;
+    const offerIndex = offersIsChecked.indexOf(currentOfferId);
 
-    evt.preventDefault();
+    offerIndex !== -1 ? offersIsChecked.splice(offerIndex, 1) : offersIsChecked.push(currentOfferId);
+
     this.updateData({
-      Offer: Object.assign(
-        {},
-        this._dueOffer,
-        {
-          [evt.target.dataset.id]: this._dueOffer.offers.map((el) => {if (evt.target.dataset.id === el.id) {
-            el.isChecked = !el.isChecked;
-            // if (el.isChecked) {
-            //   offersIsChecked.push(el.id);
-            // } else {
-            //   offersIsChecked.splice(offersIsChecked.indexOf(el.id), 1);
-            // }
-          }}),
-        },
-      ),
+      offerIds: offersIsChecked,
     }, true);
   }
 
@@ -427,9 +410,6 @@ export default class FormWaypoint extends SmartView {
   }
 
   static parseWaypointToData(waypoint, dueOffer, dueDestination, editForm) {
-    if (!editForm) {
-      dueOffer.offers.map((offer) => offer.isChecked = false);
-    }
     return Object.assign(
       {},
       waypoint,
@@ -437,9 +417,8 @@ export default class FormWaypoint extends SmartView {
         isOffer: dueOffer ? dueOffer.offers.length !== 0 : false,
         isDestination: dueDestination ? dueDestination !== '' : false,
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
-        Offer: dueOffer,
         DestinationInformation: dueDestination,
-        // offerIds: offerIdsIsChecked,
+        offerIds: !editForm ? [] : waypoint.offerIds,
       },
     );
   }

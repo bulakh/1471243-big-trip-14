@@ -26,16 +26,3 @@ export const findDueDestination = (Destinations, destination) => {
   return Destinations.find(findObject);
 };
 
-// export const getOfferIdsIsChecked = (Offer) => {
-//   const offers = Offer.offers;
-//   const offerIdsIsChecked = new Array();
-//   for (const offer of offers) {
-//     const map = new Map(Object.entries(offer));
-//     const id = map.get('id');
-//     const isChecked = map.get('isChecked');
-//     if (isChecked) {
-//       offerIdsIsChecked.push(id);
-//     }
-//   }
-//   return offerIdsIsChecked;
-// };
