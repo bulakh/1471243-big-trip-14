@@ -3,16 +3,14 @@ import {allOffers} from './mock/offer.js';
 import {allDestinations} from './mock/destination.js';
 import TripPesenter from './presenter/trip.js';
 import FilterPresenter from './presenter/filter.js';
+import NavigationPresenter from './presenter/navigation.js';
 import WaypointsModel from './model/waypoints.js';
 import OffersModel from './model/offers.js';
 import DestinationsModel from './model/destination.js';
 import FilterModel from './model/filter.js';
-import {render, RenderPosition, remove} from './utils/render.js';
+import {render, RenderPosition} from './utils/render.js';
 import NavigationView from './view/navigation.js';
 import ButtonNewEventView from './view/button-new-event.js';
-import StatisticsView from './view/statistics.js';
-import {MenuItem, UpdateType, FilterType} from './const.js';
-
 
 const WAYPOINT_COUNT = 1;
 const EDIT_FORM = true;
@@ -48,35 +46,6 @@ tripPresenter.init();
 render(tripNavigationElement, navigationComponent, RenderPosition.BEFOREEND);
 render(tripMainElement, buttonNewEventComponent, RenderPosition.BEFOREEND);
 
-let statisticsComponent = null;
+const navigationPresenter = new NavigationPresenter(pageContainer, waypointsModel, offersModel, navigationComponent, buttonNewEventComponent, tripPresenter, filterModel);
+navigationPresenter.init();
 
-const handleSiteMenuClick = (menuItem) => {
-  switch (menuItem) {
-    case MenuItem.ADD_EVENT:
-      remove(statisticsComponent);
-      tripPresenter.destroy();
-      filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-      tripPresenter.init();
-      navigationComponent.removeClassItem(MenuItem.STATS);
-      navigationComponent.addClassItem(MenuItem.TABLE);
-      tripPresenter.createWaypoint();
-      break;
-    case MenuItem.TABLE:
-      tripPresenter.init();
-      filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
-      remove(statisticsComponent);
-      navigationComponent.removeClassItem(MenuItem.STATS);
-      navigationComponent.addClassItem(MenuItem.TABLE);
-      break;
-    case MenuItem.STATS:
-      tripPresenter.destroy();
-      statisticsComponent = new StatisticsView(waypointsModel);
-      render(pageContainer, statisticsComponent, RenderPosition.BEFOREEND);
-      navigationComponent.removeClassItem(MenuItem.TABLE);
-      navigationComponent.addClassItem(MenuItem.STATS);
-      break;
-  }
-};
-
-navigationComponent.setMenuClickHandler(handleSiteMenuClick);
-buttonNewEventComponent.setMenuClickHandler(handleSiteMenuClick);

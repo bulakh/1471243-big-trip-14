@@ -218,7 +218,7 @@ export default class FormWaypoint extends SmartView {
 
   reset(waypoint) {
     this.updateData(
-      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination),
+      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, this._editForm),
     );
   }
 
@@ -341,26 +341,11 @@ export default class FormWaypoint extends SmartView {
   }
 
   _offersToggleHandler(evt) {
-    const offersIsChecked = this._data.offerIds.slice();
+    const offersIsChecked = this._data.offerIds;
+    const currentOfferId = evt.target.dataset.id;
+    const offerIndex = offersIsChecked.indexOf(currentOfferId);
 
-    // offersIsChecked.map((offerId) => {
-    //   if(evt.target.dataset.id === offerId) {
-    //     offersIsChecked.splice(offersIsChecked.indexOf(offerId), 1);
-    //   } else {
-    //     offersIsChecked.push(offerId);
-    //   }
-    // });
-
-    //Застрял здесь
-
-
-    offersIsChecked.map((id) => {
-      if (evt.target.dataset.id === id) {
-        offersIsChecked.splice(offersIsChecked.indexOf(id), 1);
-      } else {
-        offersIsChecked.push(evt.target.dataset.id);
-      }
-    });
+    offerIndex !== -1 ? offersIsChecked.splice(offerIndex, 1) : offersIsChecked.push(currentOfferId);
 
     this.updateData({
       offerIds: offersIsChecked,
@@ -424,7 +409,7 @@ export default class FormWaypoint extends SmartView {
     this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
   }
 
-  static parseWaypointToData(waypoint, dueOffer, dueDestination) {
+  static parseWaypointToData(waypoint, dueOffer, dueDestination, editForm) {
     return Object.assign(
       {},
       waypoint,
@@ -433,6 +418,7 @@ export default class FormWaypoint extends SmartView {
         isDestination: dueDestination ? dueDestination !== '' : false,
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
         DestinationInformation: dueDestination,
+        offerIds: !editForm ? [] : waypoint.offerIds,
       },
     );
   }
