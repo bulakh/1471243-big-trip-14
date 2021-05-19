@@ -1,4 +1,5 @@
 import Observer from '../utils/observer.js';
+import {nanoid} from 'nanoid';
 
 export default class Offers extends Observer {
   constructor() {
@@ -6,8 +7,9 @@ export default class Offers extends Observer {
     this._offers = [];
   }
 
-  setOffers(offers) {
+  setOffers(updateType, offers) {
     this._offers = offers.slice();
+    this._notify(updateType);
   }
 
   getOffers() {
@@ -28,5 +30,20 @@ export default class Offers extends Observer {
     ];
 
     this._notify(updateType, update);
+  }
+
+  static adaptToClient(offer) {
+    const adaptedOffer = Object.assign(
+      {},
+      offer,
+      {
+        offers: offer.offers.map((currentOffer) => Object.assign({}, currentOffer,{
+          id: nanoid(),
+          price: currentOffer.price,
+        })),
+      },
+    );
+
+    return adaptedOffer;
   }
 }

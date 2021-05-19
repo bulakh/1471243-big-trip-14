@@ -8,7 +8,7 @@ const getSumCost = (waypoints, offersModel) => {
     const map = new Map(Object.entries(waypoint));
     const price = map.get('basePrice');
     const offerIds = map.get('offerIds');
-    priceCount+= Number(price);
+    priceCount+= price;
 
     const dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
 
@@ -19,7 +19,7 @@ const getSumCost = (waypoints, offersModel) => {
       const priceOffer = mapOffer.get('price');
       offerIds.map((offerId) => {
         if (offerId === id) {
-          priceCount+= Number(priceOffer);
+          priceCount+= priceOffer;
         }
       });
     }

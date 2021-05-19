@@ -1,20 +1,21 @@
 import Observer from '../utils/observer.js';
 
-export default class Destination extends Observer {
+export default class Destinations extends Observer {
   constructor() {
     super();
     this._destinations = [];
   }
 
-  setDestinations(destinations) {
+  setDestinations(updateType, destinations) {
     this._destinations = destinations.slice();
+    this._notify(updateType);
   }
 
   getDestinations() {
     return this._destinations;
   }
 
-  updateDestination(updateType, update) {
+  updateDestinations(updateType, update) {
     const index = this._destinations.findIndex((destination) => destination.name === update.name);
 
     if (index === -1) {

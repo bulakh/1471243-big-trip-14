@@ -128,3 +128,53 @@ export const getAllNameDestinations = (destinationsModel) => {
   }
   return allDestinations;
 };
+
+export const getOfferIds = (type, checkedOffers, allOffers) => {
+  const offerIds = new Array();
+
+  allOffers.map((currentTypeOffer) => {
+    if (currentTypeOffer.type === type) {
+      currentTypeOffer.offers.map((concreteOffer) => {
+
+        checkedOffers.map((checkedOffer) => {
+          if (checkedOffer.title === concreteOffer.title) {
+            offerIds.push(concreteOffer.id);
+          }
+        });
+      });
+    }
+  });
+  return offerIds;
+};
+
+export const getOffersOnId = (type, offerIds, allOffers) => {
+  const offers = new Array();
+
+  allOffers.map((currentTypeOffer) => {
+    if (currentTypeOffer.type === type) {
+      currentTypeOffer.offers.map((concreteOffer) => {
+
+        offerIds.map((offerId) => {
+          if (concreteOffer.id === offerId) {
+            const offer = {
+              title: concreteOffer.title,
+              price: concreteOffer.price,
+            };
+            offers.push(offer);
+          }
+        });
+      });
+    }
+  });
+  return offers;
+};
+
+export const getDestination = (nameDestination, allDestinations) => {
+  let dueDestination;
+  allDestinations.map((destination) => {
+    if (destination.name === nameDestination) {
+      dueDestination = destination;
+    }
+  });
+  return dueDestination;
+};
