@@ -32,18 +32,14 @@ export default class Offers extends Observer {
     this._notify(updateType, update);
   }
 
-  static adaptToClient(offer) {
-    const adaptedOffer = Object.assign(
-      {},
-      offer,
-      {
-        offers: offer.offers.map((currentOffer) => Object.assign({}, currentOffer,{
-          id: nanoid(),
-          price: currentOffer.price,
-        })),
-      },
-    );
+  static adaptToClient(data) {
+    const adaptedOffers = data.offers.slice();
 
-    return adaptedOffer;
+    adaptedOffers.map((currentOffer) =>{
+      currentOffer.id = nanoid();
+      return currentOffer;
+    });
+
+    return Object.assign({}, data, {offers: adaptedOffers});
   }
 }

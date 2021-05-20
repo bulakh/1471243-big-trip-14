@@ -56,9 +56,10 @@ navigationPresenter.init();
 
 api.getAllDataFromServer()
   .then((data) => {
-    offersModel.setOffers(UpdateType.INIT, data[1]);
-    destinationsModel.setDestinations(UpdateType.INIT, data[2]);
-    waypointsModel.setWaypoints(UpdateType.INIT, data[0]);
+    const [waypointsData, offersData, destinationsData] = data;
+    offersModel.setOffers(UpdateType.INIT, offersData);
+    destinationsModel.setDestinations(UpdateType.INIT, destinationsData);
+    waypointsModel.setWaypoints(UpdateType.INIT, waypointsData);
 
     render(tripNavigationElement, navigationComponent, RenderPosition.BEFOREEND);
     render(tripMainElement, buttonNewEventComponent, RenderPosition.BEFOREEND);

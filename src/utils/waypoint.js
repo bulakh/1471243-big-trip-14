@@ -120,7 +120,7 @@ export const checkPrice = (price) => {
 
 export const getAllNameDestinations = (destinationsModel) => {
   const destinations = destinationsModel.getDestinations();
-  const allDestinations = new Array();
+  const allDestinations = [];
   for (const destination of destinations) {
     const map = new Map(Object.entries(destination));
     const name = map.get('name');
@@ -130,7 +130,7 @@ export const getAllNameDestinations = (destinationsModel) => {
 };
 
 export const getOfferIds = (type, checkedOffers, allOffers) => {
-  const offerIds = new Array();
+  const offerIds = [];
 
   allOffers.map((currentTypeOffer) => {
     if (currentTypeOffer.type === type) {
@@ -148,7 +148,7 @@ export const getOfferIds = (type, checkedOffers, allOffers) => {
 };
 
 export const getOffersOnId = (type, offerIds, allOffers) => {
-  const offers = new Array();
+  const offers = [];
 
   allOffers.map((currentTypeOffer) => {
     if (currentTypeOffer.type === type) {
