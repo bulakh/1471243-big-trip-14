@@ -57,6 +57,7 @@ export default class Waypoints extends Observer {
   }
 
   static adaptToClient(waypoint, allOffers) {
+    // console.log('name', waypoint.destination.name);
     const adaptedWaypoint = Object.assign(
       {},
       waypoint,
@@ -81,6 +82,7 @@ export default class Waypoints extends Observer {
   }
 
   static adaptToServer(waypoint, allOffers, allDestinations) {
+    // console.log('toServer', waypoint);
     const adaptedWaypoint = Object.assign(
       {},
       waypoint,
@@ -100,6 +102,8 @@ export default class Waypoints extends Observer {
     delete adaptedWaypoint.isFavorite;
     delete adaptedWaypoint.durationTime;
     delete adaptedWaypoint.offerIds;
+
+    // console.log('Done', adaptedWaypoint);
 
     return adaptedWaypoint;
   }

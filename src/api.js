@@ -4,6 +4,8 @@ import OffersModel from './model/offers.js';
 const Method = {
   GET: 'GET',
   PUT: 'PUT',
+  POST: 'POST',
+  DELETE: 'DELETE',
 };
 
 const SuccessHTTPStatusRange = {
@@ -54,6 +56,25 @@ export default class Api {
     })
       .then(Api.toJSON)
       .then((result) => WaypointsModel.adaptToClient(result, allOffers));
+  }
+
+  addWaypoint(waypoint, allOffers, allDestinations) {
+    return this._load({
+      url: 'points',
+      method: Method.POST,
+      body: JSON.stringify(WaypointsModel.adaptToServer(waypoint, allOffers, allDestinations)),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    })
+      .then(Api.toJSON)
+      // .then(console.log)
+      .then((result) => WaypointsModel.adaptToClient(result, allOffers));
+  }
+
+  deleteWaypoint(waypoint) {
+    return this._load({
+      url: `points/${waypoint.id}`,
+      method: Method.DELETE,
+    });
   }
 
   _load({

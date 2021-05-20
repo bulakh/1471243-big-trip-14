@@ -2,7 +2,7 @@ import SortView from '../view/sort.js';
 import PointsListView from '../view/points-list.js';
 import NoWaypointView from '../view/no-waypoints.js';
 import InformationRoutView from '../view/information-rout.js';
-import WaypointPresenter from './waypoint.js';
+import WaypointPresenter, {State as WaypointPresenterViewState} from './waypoint.js';
 import WaypointNewPresenter from './waypoint-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {sortTime, sortPrice, sortDate} from '../utils/waypoint.js';
@@ -89,17 +89,39 @@ export default class Trip {
   }
 
   _handleViewAction(actionType, updateType, update) {
+    const allOffers = this._offersModel.getOffers();
+    const allDestinations = this._destinationsModel.getDestinations();
+
     switch (actionType) {
       case UserAction.UPDATE_WAYPOINT:
-        this._api.updateWaypoint(update, this._offersModel.getOffers(), this._destinationsModel.getDestinations()).then((response) => {
-          this._waypointsModel.updateWaypoint(updateType, response);
-        });
+        this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.SAVING);
+        this._api.updateWaypoint(update, allOffers, allDestinations)
+          .then((response) => {
+            this._waypointsModel.updateWaypoint(updateType, response);
+          })
+          .catch(() => {
+            this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.ABORTING);
+          });
         break;
       case UserAction.ADD_WAYPOINT:
-        this._waypointsModel.addWaypoint(updateType, update);
+        this._waypointNewPresenter.setSaving();
+        this._api.addWaypoint(update, allOffers, allDestinations)
+          .then((response) => {
+            this._waypointsModel.addWaypoint(updateType, response);
+          })
+          .catch(() => {
+            this._waypointNewPresenter.setAborting();
+          });
         break;
       case UserAction.DELETE_WAYPOINT:
-        this._waypointsModel.deleteWaypoint(updateType, update);
+        this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.DELETING);
+        this._api.deleteWaypoint(update)
+          .then(() => {
+            this._waypointsModel.deleteWaypoint(updateType, update);
+          })
+          .catch(() => {
+            this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.ABORTING);
+          });
         break;
     }
   }

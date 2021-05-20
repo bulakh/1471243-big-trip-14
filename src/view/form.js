@@ -1,7 +1,7 @@
 import SmartView from './smart.js';
 import {TYPES, EMPTY_WAYPOINT} from '../const.js';
 import {timeStartOpenCard, timeEndOpenCard, generateDurationTime, checkPrice, getAllNameDestinations} from '../utils/waypoint.js';
-import {findDueOffer, findDueDestination} from '../utils/common.js';
+import {findDueOffer, findDueDestination, getUpperFirstLetter} from '../utils/common.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
 import '../../node_modules/flatpickr/dist/flatpickr.min.css';
@@ -31,10 +31,10 @@ const createTypeEvent = (currentType, id) => {
 const createNameDestination = (destinationsModel) => {
   const allDestinations = getAllNameDestinations(destinationsModel);
 
-  return allDestinations.map((destination) => `<option value="${destination[0].toUpperCase() + destination.slice(1)}"></option>`).join('');
+  return allDestinations.map((destination) => `<option value="${getUpperFirstLetter(destination)}"></option>`).join('');
 };
 
-const createOffer = (offers, type, offerIds) => {
+const createOffer = (offers, type, offerIds, disabledInput) => {
   const offerItems = new Array;
   for (const offer of offers) {
     const map = new Map(Object.entries(offer));
@@ -47,7 +47,7 @@ const createOffer = (offers, type, offerIds) => {
 
     const offerItem = `<div class="event__offer-selector">
       <input class="event__offer-checkbox  visually-hidden" id="event-offer-${type}-${id}"
-      data-id="${id}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''}>
+      data-id="${id}" type="checkbox" name="event-offer-${type}" ${isChecked ? 'checked' : ''} ${disabledInput}>
       <label class="event__offer-label" for="event-offer-${type}-${id}">
         <span class="event__offer-title">${title}</span>
         &plus;&euro;&nbsp;
@@ -59,9 +59,9 @@ const createOffer = (offers, type, offerIds) => {
   return offerItems.join('');
 };
 
-const toggleEditCancelButton = (edit) => {
+const toggleEditCancelButton = (edit, isDeleting) => {
   return edit
-    ? 'Delete'
+    ? isDeleting ? 'Deleting...' : 'Delete'
     : 'Cancel';
 };
 
@@ -97,21 +97,37 @@ const createSectionOffer = (offers) => {
 };
 
 const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) => {
-  const {type, id, destination, basePrice, dateFrom, dateTo, isOffer, isDestination, isSubmitDisabled, DestinationInformation, offerIds} = data;
+  const {
+    type,
+    id,
+    destination,
+    basePrice,
+    dateFrom,
+    dateTo,
+    isOffer,
+    isDestination,
+    isSubmitDisabled,
+    DestinationInformation,
+    offerIds,
+    isDisabled,
+    isSaving,
+    isDeleting,
+  } = data;
 
-  const typeTemplate = createTypeEvent(type, id);
+  const typeTemplate = createTypeEvent(type, id, isDisabled);
   const destinationTemplate = createNameDestination(destinationsModel);
   const timeStart = timeStartOpenCard(dateFrom);
   const timeEnd = timeEndOpenCard(dateTo);
 
-  const editTemplateCancel = toggleEditCancelButton(editForm);
+  const editTemplateCancel = toggleEditCancelButton(editForm, isDeleting);
   const editRollupButton = renderRollupButton(editForm);
+  const disabledInput = isDisabled ? 'disabled' : '';
 
   let sectionOffer;
   let sectionDestination;
 
   if(isOffer) {
-    const offers = createOffer(dueOffer.offers, type, offerIds);
+    const offers = createOffer(dueOffer.offers, type, offerIds, disabledInput);
     sectionOffer = createSectionOffer(offers);
   }
 
@@ -128,7 +144,7 @@ const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) =>
             <span class="visually-hidden">Choose event type</span>
             <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
           </label>
-          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox">
+          <input class="event__type-toggle  visually-hidden" id="event-type-toggle-${id}" type="checkbox" ${disabledInput}>
 
           <div class="event__type-list">
             <fieldset class="event__type-group">
@@ -142,7 +158,7 @@ const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) =>
           <label class="event__label  event__type-output" for="event-destination-${id}">
             ${type}
           </label>
-          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destination}" list="destination-list-${id}">
+          <input class="event__input  event__input--destination" id="event-destination-${id}" type="text" name="event-destination" value="${destination}" list="destination-list-${id}" ${disabledInput}>
           <datalist id="destination-list-${id}">
             ${destinationTemplate}
           </datalist>
@@ -150,10 +166,10 @@ const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) =>
 
         <div class="event__field-group  event__field-group--time">
           <label class="visually-hidden" for="event-start-time-${id}">From</label>
-          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${id}" type="text" name="event-start-time" value="${timeStart}">
+          <input class="event__input  event__input--time event__input--time-start" id="event-start-time-${id}" type="text" name="event-start-time" value="${timeStart}" ${disabledInput}>
           &mdash;
           <label class="visually-hidden" for="event-end-time-1">To</label>
-          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${id}" type="text" name="event-end-time" value="${timeEnd}">
+          <input class="event__input  event__input--time event__input--time-end" id="event-end-time-${id}" type="text" name="event-end-time" value="${timeEnd}" ${disabledInput}>
         </div>
 
         <div class="event__field-group  event__field-group--price">
@@ -161,11 +177,11 @@ const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) =>
             <span class="visually-hidden">Price</span>
             &euro;
           </label>
-          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${checkPrice(basePrice)}">
+          <input class="event__input  event__input--price" id="event-price-${id}" type="number" name="event-price" value="${checkPrice(basePrice)}" ${disabledInput}>
         </div>
 
-        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled ? 'disabled' : ''}>Save</button>
-        <button class="event__reset-btn" type="reset">${editTemplateCancel}</button>
+        <button class="event__save-btn  btn  btn--blue" type="submit" ${isSubmitDisabled || isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+        <button class="event__reset-btn" type="reset" ${disabledInput}>${editTemplateCancel}</button>
         ${editRollupButton}
       </header>
       <section class="event__details">
@@ -419,6 +435,9 @@ export default class FormWaypoint extends SmartView {
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
         DestinationInformation: dueDestination,
         offerIds: !editForm ? [] : waypoint.offerIds,
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
       },
     );
   }
@@ -430,6 +449,9 @@ export default class FormWaypoint extends SmartView {
     delete data.isDestination;
     delete data.isSubmitDisabled;
     delete data.DestinationInformation;
+    delete data.isDisabled;
+    delete data.isSaving;
+    delete data.isDeleting;
 
     return data;
   }

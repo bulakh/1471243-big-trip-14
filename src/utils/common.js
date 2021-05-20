@@ -26,3 +26,8 @@ export const findDueDestination = (Destinations, destination) => {
   return Destinations.find(findObject);
 };
 
+export const getUpperFirstLetter = (currentWord) => {
+  const words = currentWord.split(' ');
+  return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
+};
+
