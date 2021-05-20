@@ -120,11 +120,61 @@ export const checkPrice = (price) => {
 
 export const getAllNameDestinations = (destinationsModel) => {
   const destinations = destinationsModel.getDestinations();
-  const allDestinations = new Array();
+  const allDestinations = [];
   for (const destination of destinations) {
     const map = new Map(Object.entries(destination));
     const name = map.get('name');
     allDestinations.push(name.toLowerCase());
   }
   return allDestinations;
+};
+
+export const getOfferIds = (type, checkedOffers, allOffers) => {
+  const offerIds = [];
+
+  allOffers.map((currentTypeOffer) => {
+    if (currentTypeOffer.type === type) {
+      currentTypeOffer.offers.map((concreteOffer) => {
+
+        checkedOffers.map((checkedOffer) => {
+          if (checkedOffer.title === concreteOffer.title) {
+            offerIds.push(concreteOffer.id);
+          }
+        });
+      });
+    }
+  });
+  return offerIds;
+};
+
+export const getOffersOnId = (type, offerIds, allOffers) => {
+  const offers = [];
+
+  allOffers.map((currentTypeOffer) => {
+    if (currentTypeOffer.type === type) {
+      currentTypeOffer.offers.map((concreteOffer) => {
+
+        offerIds.map((offerId) => {
+          if (concreteOffer.id === offerId) {
+            const offer = {
+              title: concreteOffer.title,
+              price: concreteOffer.price,
+            };
+            offers.push(offer);
+          }
+        });
+      });
+    }
+  });
+  return offers;
+};
+
+export const getDestination = (nameDestination, allDestinations) => {
+  let dueDestination;
+  allDestinations.map((destination) => {
+    if (destination.name === nameDestination) {
+      dueDestination = destination;
+    }
+  });
+  return dueDestination;
 };

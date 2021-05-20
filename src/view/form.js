@@ -373,7 +373,7 @@ export default class FormWaypoint extends SmartView {
 
   _priceChangeHandler(evt) {
     this.updateData({
-      basePrice: evt.target.value,
+      basePrice: parseInt(evt.target.value, 10),
     });
   }
 
@@ -429,6 +429,7 @@ export default class FormWaypoint extends SmartView {
     delete data.isOffer;
     delete data.isDestination;
     delete data.isSubmitDisabled;
+    delete data.DestinationInformation;
 
     return data;
   }

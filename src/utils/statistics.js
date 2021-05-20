@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import {findDueOffer} from './common.js';
 
 export const getUniqTypes = (waypoints) => {
-  const types = new Array();
+  const types = [];
   for (const waypoint of waypoints) {
     const map = new Map(Object.entries(waypoint));
     const type = map.get('type');
@@ -12,12 +12,12 @@ export const getUniqTypes = (waypoints) => {
 };
 
 export const getPricesFromType = (waypoints, types, offers) => {
-  const prices = new Array();
+  const prices = [];
 
   types.map((elemX) => {
     const filteredOnType = waypoints.filter((waypoint) => waypoint.type === elemX);
     const dueOffer = findDueOffer(offers, elemX);
-    const pricesOfType = new Array();
+    const pricesOfType = [];
 
     filteredOnType.map((elemY) => {
       let sumPriceOfOffers = 0;
@@ -43,7 +43,7 @@ export const getPricesFromType = (waypoints, types, offers) => {
 };
 
 export const getCountTypes = (waypoints, types) => {
-  const counts = new Array();
+  const counts = [];
 
   types.map((elemX) => {
     const filteredOnType = waypoints.filter((waypoint) => waypoint.type === elemX);
@@ -57,11 +57,11 @@ export const getCountTypes = (waypoints, types) => {
 };
 
 export const getTimeFromType = (waypoints, types) => {
-  const time = new Array();
+  const time = [];
 
   types.map((elemX) => {
     const filteredOnType = waypoints.filter((waypoint) => waypoint.type === elemX);
-    const sumDiffInMs = new Array();
+    const sumDiffInMs = [];
     filteredOnType.map((elemY) => sumDiffInMs.push(dayjs(elemY.dateTo).diff(dayjs(elemY.dateFrom))));
     const typeAndTime = {
       type: elemX,
