@@ -66,7 +66,6 @@ export default class Api {
       headers: new Headers({'Content-Type': 'application/json'}),
     })
       .then(Api.toJSON)
-      // .then(console.log)
       .then((result) => WaypointsModel.adaptToClient(result, allOffers));
   }
 
