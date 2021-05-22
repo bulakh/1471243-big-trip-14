@@ -1,5 +1,4 @@
 import FormWaipointView from '../view/form.js';
-import {nanoid} from 'nanoid';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 
@@ -47,6 +46,25 @@ export default class WaypointNew {
     document.removeEventListener('keydown', this._escKeyDownHandler);
   }
 
+  setSaving() {
+    this._waypointEditComponent.updateData({
+      isDisabled: true,
+      isSaving: true,
+    });
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this._waypointEditComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    this._waypointEditComponent.shake(resetFormState);
+  }
+
   addDisabled() {
     this._buttonNewEvent.getElement().setAttribute('disabled', 'disabled');
   }
@@ -59,14 +77,8 @@ export default class WaypointNew {
     this._changeData(
       UserAction.ADD_WAYPOINT,
       UpdateType.MINOR,
-      Object.assign(
-        {},
-        waypoint,
-        {
-          id: nanoid(),
-        }),
+      waypoint,
     );
-    this.destroy();
   }
 
   _handleDeleteClick() {

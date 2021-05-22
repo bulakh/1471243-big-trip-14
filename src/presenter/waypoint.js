@@ -9,6 +9,12 @@ const Mode = {
   EDITING: 'EDITING',
 };
 
+export const State = {
+  SAVING: 'SAVING',
+  DELETING: 'DELETING',
+  ABORTING: 'ABORTING',
+};
+
 export default class Waypoint {
   constructor (waypointContainer, changeData, changeMode, offersModel, destinationsModel) {
     this._waypointContainer = waypointContainer;
@@ -55,7 +61,8 @@ export default class Waypoint {
     }
 
     if (this._mode === Mode.EDITING) {
-      replace(this._waypointEditFormComponent, prevWaypointEditFormComponent);
+      replace(this._waypointComponent, prevWaypointEditFormComponent);
+      this._mode = Mode.DEFAULT;
     }
 
     remove(prevWaypointComponent);
@@ -70,6 +77,35 @@ export default class Waypoint {
   resetView() {
     if (this._mode !== Mode.DEFAULT) {
       this._replaceFormToCard();
+    }
+  }
+
+  setViewState(state) {
+    const resetFormState = () => {
+      this._waypointEditFormComponent.updateData({
+        isDisabled: false,
+        isSaving: false,
+        isDeleting: false,
+      });
+    };
+
+    switch (state) {
+      case State.SAVING:
+        this._waypointEditFormComponent.updateData({
+          isDisabled: true,
+          isSaving: true,
+        });
+        break;
+      case State.DELETING:
+        this._waypointEditFormComponent.updateData({
+          isDisabled: true,
+          isDeleting: true,
+        });
+        break;
+      case State.ABORTING:
+        this._waypointComponent.shake(resetFormState);
+        this._waypointEditFormComponent.shake(resetFormState);
+        break;
     }
   }
 
@@ -125,7 +161,6 @@ export default class Waypoint {
       isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       update,
     );
-    this._replaceFormToCard();
   }
 
   _handleDeleteClick(waypoint) {
