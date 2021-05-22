@@ -1,8 +1,10 @@
 import FormWaipointView from '../view/form.js';
 import WaypointView from '../view/waypoint.js';
+import {isOnline} from '../utils/common.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import {isDatesEqual} from '../utils/waypoint.js';
 import {UserAction, UpdateType} from '../const.js';
+import {toast} from '../utils/toast.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -131,6 +133,11 @@ export default class Waypoint {
   }
 
   _handleEditClick() {
+    if (!isOnline()) {
+      toast('You can\'t edit waypoint offline');
+      return;
+    }
+
     this._replaceCardToForm();
   }
 
@@ -154,6 +161,11 @@ export default class Waypoint {
   }
 
   _handleFormSubmit(update) {
+    if (!isOnline()) {
+      toast('You can\'t save waypoint offline');
+      return;
+    }
+
     const isMinorUpdate = !isDatesEqual(this._waypoint.dateFrom, update.dateFrom);
 
     this._changeData(
@@ -164,6 +176,11 @@ export default class Waypoint {
   }
 
   _handleDeleteClick(waypoint) {
+    if (!isOnline()) {
+      toast('You can\'t delete waypoint offline');
+      return;
+    }
+
     this._changeData(
       UserAction.DELETE_WAYPOINT,
       UpdateType.MINOR,

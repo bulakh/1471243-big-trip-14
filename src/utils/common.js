@@ -31,3 +31,6 @@ export const getUpperFirstLetter = (currentWord) => {
   return words.map((word) => word[0].toUpperCase() + word.slice(1)).join(' ');
 };
 
+export const isOnline = () => {
+  return window.navigator.onLine;
+};
