@@ -1,5 +1,5 @@
-import WaypointsModel from './model/waypoints.js';
-import OffersModel from './model/offers.js';
+import WaypointsModel from '../model/waypoints.js';
+import OffersModel from '../model/offers.js';
 
 const Method = {
   GET: 'GET',
@@ -22,10 +22,10 @@ export default class Api {
   getAllDataFromServer() {
     return Promise.all([this.getWaypointsWithoutAdapt(), this.getOffers(), this.getDestiantions()])
       .then((result) => {
-        const [waypointsData, offeresData, destionationData] = result;
+        const [waypointsData, offersData, destionationData] = result;
         return [
-          waypointsData.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offeresData)),
-          offeresData,
+          waypointsData.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offersData)),
+          offersData,
           destionationData,
         ];
       });
@@ -74,6 +74,16 @@ export default class Api {
       url: `points/${waypoint.id}`,
       method: Method.DELETE,
     });
+  }
+
+  sync(data) {
+    return this._load({
+      url: 'points/sync',
+      method: Method.POST,
+      body: JSON.stringify(data),
+      headers: new Headers({'Content-Type': 'application/json'}),
+    })
+      .then(Api.toJSON);
   }
 
   _load({

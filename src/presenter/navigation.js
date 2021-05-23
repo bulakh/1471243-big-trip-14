@@ -1,6 +1,8 @@
 import StatisticsView from '../view/statistics.js';
 import {MenuItem, UpdateType, FilterType} from '../const.js';
 import {render, RenderPosition, remove} from '../utils/render.js';
+import {isOnline} from '../utils/common.js';
+import {toast} from '../utils/toast.js';
 
 export default class Navigation {
   constructor(pageContainer, waypointsModel, offersModel, navigationComponent, buttonNewEventComponent, tripPresenter, filterModel) {
@@ -33,6 +35,10 @@ export default class Navigation {
         this._tripPresenter.init();
         this._navigationComponent.removeClassItem(MenuItem.STATS);
         this._navigationComponent.addClassItem(MenuItem.TABLE);
+        if (!isOnline()) {
+          toast('You can\'t create new waypoint offline');
+          break;
+        }
         this._tripPresenter.createWaypoint();
         break;
       case MenuItem.TABLE:
