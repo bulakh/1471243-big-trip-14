@@ -22,7 +22,6 @@ export default class Api {
   getAllDataFromServer() {
     return Promise.all([this.getWaypointsWithoutAdapt(), this.getOffers(), this.getDestiantions()])
       .then((result) => {
-        console.log('resultAPI',result);
         const [waypointsData, offersData, destionationData] = result;
         return [
           waypointsData.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offersData)),

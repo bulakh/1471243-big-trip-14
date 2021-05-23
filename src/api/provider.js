@@ -28,13 +28,11 @@ export default class Provider {
       return this._api.getAllDataFromServer()
         .then((data) => {
           const [waypointsData, offersData, destionationData] = data;
-          console.log('proveiderData', data);
           const itemsWaypoint = createStoreStructure(waypointsData.map((waypoint) => WaypointsModel.adaptToServer(waypoint, offersData, destionationData)));
 
           this._store.setItems(itemsWaypoint);
           this._store.setItem(this.KEY_DESTINATIONS, destionationData);
           this._store.setItem(this.KEY_OFFERS, offersData);
-          console.log('getItams',this._store.getItems());
 
           return data;
         });
@@ -48,7 +46,6 @@ export default class Provider {
     const adaptWaypoints = storeData.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offers));
 
     const adaptData = [adaptWaypoints, offers, destinations];
-    console.log('arrResolve', adaptData);
 
     return Promise.resolve(adaptData);
   }
@@ -95,9 +92,6 @@ export default class Provider {
       this._store.removeItem(this.KEY_DESTINATIONS);
       this._store.removeItem(this.KEY_OFFERS);
       const storeWaypoints = Object.values(this._store.getItems());
-
-      console.log('storeWaypoints', storeWaypoints);
-
 
       return this._api.sync(storeWaypoints)
         .then((response) => {

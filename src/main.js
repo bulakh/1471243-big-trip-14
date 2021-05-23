@@ -65,7 +65,6 @@ navigationPresenter.init();
 
 apiWithProvider.getAllDataFromServer()
   .then((data) => {
-    console.log('dataMain', data);
     const [waypointsData, offersData, destinationsData] = data;
     offersModel.setOffers(UpdateType.INIT, offersData);
     destinationsModel.setDestinations(UpdateType.INIT, destinationsData);
