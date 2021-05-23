@@ -18,6 +18,9 @@ export default class Provider {
   constructor(api, store) {
     this._api = api;
     this._store = store;
+
+    this.KEY_DESTINATIONS = 'destinations';
+    this.KEY_OFFERS = 'offers';
   }
 
   getAllDataFromServer() {
@@ -25,24 +28,29 @@ export default class Provider {
       return this._api.getAllDataFromServer()
         .then((data) => {
           const [waypointsData, offersData, destionationData] = data;
+          console.log('proveiderData', data);
           const itemsWaypoint = createStoreStructure(waypointsData.map((waypoint) => WaypointsModel.adaptToServer(waypoint, offersData, destionationData)));
 
-          const KEY_OFFERS = 0;
-          const KEY_DESTINATIONS = 1;
-
           this._store.setItems(itemsWaypoint);
-          this._store.setItem(KEY_OFFERS, offersData);
-          this._store.setItem(KEY_DESTINATIONS, destionationData);
+          this._store.setItem(this.KEY_DESTINATIONS, destionationData);
+          this._store.setItem(this.KEY_OFFERS, offersData);
+          console.log('getItams',this._store.getItems());
 
           return data;
         });
     }
 
     const storeData = Object.values(this._store.getItems());
-    const [offers, destionations, ...waypoints] = storeData;
-    const adaptWaypoints = waypoints.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offers));
+    const destinations = storeData[storeData.length-2];
+    const offers = storeData[storeData.length-1];
+    storeData.splice(storeData.length-2, 2);
 
-    return Promise.resolve([adaptWaypoints, offers, destionations]);
+    const adaptWaypoints = storeData.map((waypoint) => WaypointsModel.adaptToClient(waypoint, offers));
+
+    const adaptData = [adaptWaypoints, offers, destinations];
+    console.log('arrResolve', adaptData);
+
+    return Promise.resolve(adaptData);
   }
 
   updateWaypoint(waypoint, allOffers, allDestinations) {
@@ -84,7 +92,12 @@ export default class Provider {
 
   sync() {
     if (isOnline()) {
+      this._store.removeItem(this.KEY_DESTINATIONS);
+      this._store.removeItem(this.KEY_OFFERS);
       const storeWaypoints = Object.values(this._store.getItems());
+
+      console.log('storeWaypoints', storeWaypoints);
+
 
       return this._api.sync(storeWaypoints)
         .then((response) => {

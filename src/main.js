@@ -16,7 +16,7 @@ import Api from './api/api.js';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
 
-const AUTHORIZATION = 'Basic 4Sf78zkeNqemuwpfTG';
+const AUTHORIZATION = 'Basic 4Sf78f5Nq8eu6ddfT5G';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 const STORE_PREFIX = 'big-trip-localstorage';
 const STORE_VER = 'v14';
@@ -65,6 +65,7 @@ navigationPresenter.init();
 
 apiWithProvider.getAllDataFromServer()
   .then((data) => {
+    console.log('dataMain', data);
     const [waypointsData, offersData, destinationsData] = data;
     offersModel.setOffers(UpdateType.INIT, offersData);
     destinationsModel.setDestinations(UpdateType.INIT, destinationsData);
