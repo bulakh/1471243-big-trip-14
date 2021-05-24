@@ -1,5 +1,5 @@
 import AbstractView from './abstract.js';
-import {sortDate, timeStartHeader, timeEndHeader, checkPrice} from '../utils/waypoint.js';
+import {sortDate, getTimeStartHeader, getTimeEndHeader, checkPrice} from '../utils/waypoint.js';
 import {findDueOffer} from '../utils/common.js';
 
 const getSumCost = (waypoints, offersModel) => {
@@ -33,8 +33,8 @@ const createInformationRoutTemplate = (waypoints, offersModel) => {
   const firstDestination = sortedWaypoints[0].destination;
   const secondDestination = sortedWaypoints.length === 3 ? sortedWaypoints[1].destination : '...';
   const lastDestination = sortedWaypoints[sortedWaypoints.length - 1].destination;
-  const startDay = timeStartHeader(sortedWaypoints[0].dateFrom);
-  const lastDay = timeEndHeader(sortedWaypoints[sortedWaypoints.length - 1].dateFrom);
+  const startDay = getTimeStartHeader(sortedWaypoints[0].dateFrom);
+  const lastDay = getTimeEndHeader(sortedWaypoints[sortedWaypoints.length - 1].dateFrom);
   const sumOfCosts = getSumCost(waypoints, offersModel);
 
   return `<section class="trip-main__trip-info  trip-info">

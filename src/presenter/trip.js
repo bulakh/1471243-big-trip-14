@@ -1,5 +1,5 @@
 import SortView from '../view/sort.js';
-import PointsListView from '../view/points-list.js';
+import WaypointsListView from '../view/waypoints-list.js';
 import NoWaypointView from '../view/no-waypoints.js';
 import InformationRoutView from '../view/information-rout.js';
 import WaypointPresenter, {State as WaypointPresenterViewState} from './waypoint.js';
@@ -10,7 +10,17 @@ import {filter} from '../utils/filter.js';
 import {SortType, UpdateType, UserAction} from '../const.js';
 
 export default class Trip {
-  constructor(tripContainer, informationContainer, waypointsModel, filterModel, offersModel, destinationsModel, EDIT_FORM, buttonNewEvent, loadingEvent, api) {
+  constructor(
+    tripContainer,
+    informationContainer,
+    waypointsModel,
+    filterModel,
+    offersModel,
+    destinationsModel,
+    EDIT_FORM,
+    buttonNewEvent,
+    loadingEvent,
+    api) {
     this._waypointsModel = waypointsModel;
     this._destinationsModel = destinationsModel;
     this._offersModel = offersModel;
@@ -26,7 +36,7 @@ export default class Trip {
     this._isLoading = true;
     this._api = api;
 
-    this._waypointListComponent = new PointsListView();
+    this._waypointListComponent = new WaypointsListView();
     this._noWaypointComponent = new NoWaypointView();
     this._informationRoutComponent = new InformationRoutView(this._waypointsModel, this._offersModel);
     this._loadingComponent = loadingEvent;
