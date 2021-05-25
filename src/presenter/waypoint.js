@@ -18,7 +18,12 @@ export const State = {
 };
 
 export default class Waypoint {
-  constructor (waypointContainer, changeData, changeMode, offersModel, destinationsModel) {
+  constructor (
+    waypointContainer,
+    changeData,
+    changeMode,
+    offersModel,
+    destinationsModel) {
     this._waypointContainer = waypointContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
@@ -134,6 +139,7 @@ export default class Waypoint {
 
   _handleEditClick() {
     if (!isOnline()) {
+      this.setViewState(State.ABORTING);
       toast('You can\'t edit waypoint offline');
       return;
     }
@@ -162,6 +168,7 @@ export default class Waypoint {
 
   _handleFormSubmit(update) {
     if (!isOnline()) {
+      this.setViewState(State.ABORTING);
       toast('You can\'t save waypoint offline');
       return;
     }
@@ -177,6 +184,7 @@ export default class Waypoint {
 
   _handleDeleteClick(waypoint) {
     if (!isOnline()) {
+      this.setViewState(State.ABORTING);
       toast('You can\'t delete waypoint offline');
       return;
     }

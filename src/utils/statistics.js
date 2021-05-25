@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import {findDueOffer} from './common.js';
 
 export const getUniqTypes = (waypoints) => {
   const types = [];
@@ -11,25 +10,15 @@ export const getUniqTypes = (waypoints) => {
   return [...new Set(types)];
 };
 
-export const getPricesFromType = (waypoints, types, offers) => {
+export const getPricesFromType = (waypoints, types) => {
   const prices = [];
 
   types.map((elemX) => {
     const filteredOnType = waypoints.filter((waypoint) => waypoint.type === elemX);
-    const dueOffer = findDueOffer(offers, elemX);
     const pricesOfType = [];
 
     filteredOnType.map((elemY) => {
-      let sumPriceOfOffers = 0;
-      elemY.basePrice = parseInt(elemY.basePrice, 10);
-      elemY.offerIds.map((offerId) => {
-        dueOffer.offers.map((offer) => {
-          if (offer.id === offerId) {
-            sumPriceOfOffers += parseInt(offer.price, 10);
-          }
-        });
-      });
-      pricesOfType.push(parseInt(elemY.basePrice, 10) + sumPriceOfOffers);
+      pricesOfType.push(elemY.basePrice);
     });
 
     const typeAndPrice = {

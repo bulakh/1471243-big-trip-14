@@ -1,5 +1,5 @@
 import Observer from '../utils/observer.js';
-import {generateDurationTime, getOfferIds, getOffersOnId, getDestination} from '../utils/waypoint.js';
+import {createDurationTime, getOfferIds, getOffersOnId, getDestination} from '../utils/waypoint.js';
 
 export default class Waypoints extends Observer {
   constructor() {
@@ -65,7 +65,7 @@ export default class Waypoints extends Observer {
         basePrice: waypoint.base_price,
         dateFrom: new Date(waypoint.date_from),
         dateTo: new Date(waypoint.date_to),
-        durationTime: generateDurationTime(waypoint.date_from, waypoint.date_to),
+        durationTime: createDurationTime(waypoint.date_from, waypoint.date_to),
         isFavorite: waypoint.is_favorite,
         offerIds: getOfferIds(waypoint.type, waypoint.offers, allOffers),
       },

@@ -16,7 +16,7 @@ import Api from './api/api.js';
 import Store from './api/store.js';
 import Provider from './api/provider.js';
 
-const AUTHORIZATION = 'Basic 4Sf78f5Nq8eu6ddfT5G';
+const AUTHORIZATION = 'Basic 4Sf78f5Nq86ddfT5G';
 const END_POINT = 'https://14.ecmascript.pages.academy/big-trip';
 const STORE_PREFIX = 'big-trip-localstorage';
 const STORE_VER = 'v14';
@@ -60,7 +60,13 @@ const tripPresenter = new TripPesenter(
   apiWithProvider);
 tripPresenter.init();
 
-const navigationPresenter = new NavigationPresenter(pageContainer, waypointsModel, offersModel, navigationComponent, buttonNewEventComponent, tripPresenter, filterModel);
+const navigationPresenter = new NavigationPresenter(
+  pageContainer,
+  waypointsModel,
+  navigationComponent,
+  buttonNewEventComponent,
+  tripPresenter,
+  filterModel);
 navigationPresenter.init();
 
 apiWithProvider.getAllDataFromServer()
@@ -78,15 +84,14 @@ apiWithProvider.getAllDataFromServer()
     render(tripEventsElement, errorEvent , RenderPosition.BEFOREEND);
   });
 
-
 window.addEventListener('load', () => {
   navigator.serviceWorker.register('/sw.js');
 });
 
 window.addEventListener('online', () => {
-  const GOOD_MSG = true;
+  const SUCCESS_MESSAGE = true;
   document.title = document.title.replace(' [offline]', '');
-  toast('You are online!', GOOD_MSG);
+  toast('You are online!', SUCCESS_MESSAGE);
   apiWithProvider.sync();
 });
 
