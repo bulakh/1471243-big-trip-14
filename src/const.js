@@ -4,7 +4,7 @@ export const EMPTY_WAYPOINT = {
   id: '',
   type: TYPES[0],
   destination:  '',
-  basePrice: 0,
+  basePrice: 10,
   dateFrom : new Date(),
   dateTo: new Date(),
   durationTime: '',

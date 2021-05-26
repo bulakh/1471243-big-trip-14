@@ -1,6 +1,9 @@
 import WaypointsModel from '../model/waypoints.js';
 import {isOnline} from '../utils/common.js';
 
+const KEY_DESTINATIONS = 'destinations';
+const KEY_OFFERS = 'offers';
+
 const getSyncedWaypoints = (items) => {
   return items.filter(({success}) => success)
     .map(({payload}) => payload.waypoint);
@@ -18,9 +21,6 @@ export default class Provider {
   constructor(api, store) {
     this._api = api;
     this._store = store;
-
-    this.KEY_DESTINATIONS = 'destinations';
-    this.KEY_OFFERS = 'offers';
   }
 
   getAllDataFromServer() {
@@ -31,8 +31,8 @@ export default class Provider {
           const itemsWaypoint = createStoreStructure(waypointsData.map((waypoint) => WaypointsModel.adaptToServer(waypoint, offersData, destionationData)));
 
           this._store.setItems(itemsWaypoint);
-          this._store.setItem(this.KEY_DESTINATIONS, destionationData);
-          this._store.setItem(this.KEY_OFFERS, offersData);
+          this._store.setItem(KEY_DESTINATIONS, destionationData);
+          this._store.setItem(KEY_OFFERS, offersData);
 
           return data;
         });
@@ -89,8 +89,8 @@ export default class Provider {
 
   sync() {
     if (isOnline()) {
-      this._store.removeItem(this.KEY_DESTINATIONS);
-      this._store.removeItem(this.KEY_OFFERS);
+      this._store.removeItem(KEY_DESTINATIONS);
+      this._store.removeItem(KEY_OFFERS);
       const storeWaypoints = Object.values(this._store.getItems());
 
       return this._api.sync(storeWaypoints)

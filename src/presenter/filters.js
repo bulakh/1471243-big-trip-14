@@ -1,9 +1,9 @@
-import FiltersView from '../view/filter.js';
+import FiltersView from '../view/filters.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';
 import {FilterType, UpdateType} from '../const.js';
-import {filter} from '../utils/filter.js';
+import {filter} from '../utils/filters.js';
 
-export default class Filter {
+export default class Filters {
   constructor(filterContainer, filterModel, waypointsModel){
     this._filterContainer = filterContainer;
     this._filterModel = filterModel;
@@ -19,10 +19,10 @@ export default class Filter {
   }
 
   init() {
-    const filters = this._getFilters();
+    const filters = this._get();
     const prevFilterComponent = this._filterComponent;
 
-    this._filterComponent = new FiltersView(filters, this._filterModel.getFilter());
+    this._filterComponent = new FiltersView(filters, this._filterModel.get());
     this._filterComponent.setFilterTypeChangeHandler(this._handleFilterTypeChange);
 
     if (prevFilterComponent === null) {
@@ -39,15 +39,15 @@ export default class Filter {
   }
 
   _handleFilterTypeChange(filterType) {
-    if (this._filterModel.getFilter() === filterType) {
+    if (this._filterModel.get() === filterType) {
       return;
     }
 
-    this._filterModel.setFilter(UpdateType.MAJOR, filterType);
+    this._filterModel.set(UpdateType.MAJOR, filterType);
   }
 
-  _getFilters() {
-    const waypoints = this._waypointsModel.getWaypoints();
+  _get() {
+    const waypoints = this._waypointsModel.get();
 
     return [
       {

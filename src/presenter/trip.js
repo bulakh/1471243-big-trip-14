@@ -6,7 +6,7 @@ import WaypointPresenter, {State as WaypointPresenterViewState} from './waypoint
 import WaypointNewPresenter from './waypoint-new.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {sortTime, sortPrice, sortDate} from '../utils/waypoint.js';
-import {filter} from '../utils/filter.js';
+import {filter} from '../utils/filters.js';
 import {SortType, UpdateType, UserAction} from '../const.js';
 
 export default class Trip {
@@ -57,11 +57,11 @@ export default class Trip {
     this._offersModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
 
-    this._renderTrip();
+    this._render();
   }
 
   destroy() {
-    this._clearTrip({resetSortType: true, destroyInformation: false});
+    this._clear({resetSortType: true, destroyInformation: false});
 
     remove(this._waypointListComponent);
     remove(this._sortComponent);
@@ -78,8 +78,8 @@ export default class Trip {
   }
 
   _getWaypoints() {
-    const filterType = this._filterModel.getFilter();
-    const waypoints = this._waypointsModel.getWaypoints();
+    const filterType = this._filterModel.get();
+    const waypoints = this._waypointsModel.get();
     const filtredWaypoints = filter[filterType](waypoints);
 
     switch (this._currentSortType) {
@@ -99,15 +99,15 @@ export default class Trip {
   }
 
   _handleViewAction(actionType, updateType, update) {
-    const allOffers = this._offersModel.getOffers();
-    const allDestinations = this._destinationsModel.getDestinations();
+    const allOffers = this._offersModel.get();
+    const allDestinations = this._destinationsModel.get();
 
     switch (actionType) {
       case UserAction.UPDATE_WAYPOINT:
         this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.SAVING);
         this._api.updateWaypoint(update, allOffers, allDestinations)
           .then((response) => {
-            this._waypointsModel.updateWaypoint(updateType, response);
+            this._waypointsModel.update(updateType, response);
           })
           .catch(() => {
             this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.ABORTING);
@@ -117,7 +117,7 @@ export default class Trip {
         this._waypointNewPresenter.setSaving();
         this._api.addWaypoint(update, allOffers, allDestinations)
           .then((response) => {
-            this._waypointsModel.addWaypoint(updateType, response);
+            this._waypointsModel.add(updateType, response);
           })
           .catch(() => {
             this._waypointNewPresenter.setAborting();
@@ -127,7 +127,7 @@ export default class Trip {
         this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.DELETING);
         this._api.deleteWaypoint(update)
           .then(() => {
-            this._waypointsModel.deleteWaypoint(updateType, update);
+            this._waypointsModel.delete(updateType, update);
           })
           .catch(() => {
             this._waypointPresenter[update.id].setViewState(WaypointPresenterViewState.ABORTING);
@@ -144,18 +144,18 @@ export default class Trip {
         this._renderInformationRout();
         break;
       case UpdateType.MINOR:
-        this._clearTrip();
-        this._renderTrip();
+        this._clear();
+        this._render();
         break;
       case UpdateType.MAJOR:
-        this._clearTrip({resetSortType: true});
-        this._renderTrip();
+        this._clear({resetSortType: true});
+        this._render();
         break;
       case UpdateType.INIT:
         this._isLoading = false;
         remove(this._loadingComponent);
         remove(this._noWaypointComponent);
-        this._renderTrip();
+        this._render();
         break;
     }
   }
@@ -166,8 +166,8 @@ export default class Trip {
     }
 
     this._currentSortType = sortType;
-    this._clearTrip();
-    this._renderTrip();
+    this._clear();
+    this._render();
   }
 
   _renderSort() {
@@ -203,7 +203,7 @@ export default class Trip {
     render(this._tripContainer, this._loadingComponent, RenderPosition.BEFOREEND);
   }
 
-  _clearTrip({resetSortType = false, destroyInformation = true} = {}) {
+  _clear({resetSortType = false, destroyInformation = true} = {}) {
     this._waypointNewPresenter.destroy();
     Object
       .values(this._waypointPresenter)
@@ -223,7 +223,7 @@ export default class Trip {
     }
   }
 
-  _renderTrip() {
+  _render() {
     if (this._isLoading) {
       this._renderLoading();
       return;
