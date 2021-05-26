@@ -245,6 +245,23 @@ export default class FormWaypoint extends SmartView {
     this._setDatepicker();
   }
 
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  setCardtoBackHandler(callback) {
+    this._callback.backClick = callback;
+    if (this._editForm) {
+      this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
+    }
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
+  }
+
   _setInnerHandlers() {
     this.getElement()
       .querySelector('.event__input--destination')
@@ -413,23 +430,6 @@ export default class FormWaypoint extends SmartView {
   _formDeleteClickHandler(evt) {
     evt.preventDefault();
     this._callback.deleteClick(FormWaypoint.parseDataToWaypoint(this._data));
-  }
-
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
-  }
-
-  setCardtoBackHandler(callback) {
-    this._callback.backClick = callback;
-    if (this._editForm) {
-      this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
-    }
-  }
-
-  setDeleteClickHandler(callback) {
-    this._callback.deleteClick = callback;
-    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
   }
 
   static parseWaypointToData(waypoint, dueOffer, dueDestination) {
