@@ -88,10 +88,25 @@ export const getDifferenceToFormat = (differenceInMs) => {
   const MS_IN_HOUR = 3600000;
   const MS_IN_DAY = 86400000;
 
+  const addDoubleCountFormat = (number) => {
+    const COUNT_SYMBOLS = 1;
+
+    const lengthOfNumber = String(number).split('').length;
+
+    if (lengthOfNumber === COUNT_SYMBOLS) {
+      return '0' + number;
+    }
+    return number;
+  };
+
+  const daysFormat = dayjs.duration(differenceInMs).days();
+  const hoursFormat = dayjs.duration(differenceInMs).hours();
+  const minutesFormat = dayjs.duration(differenceInMs).minutes();
+
   const difference = {
-    days: dayjs.duration(differenceInMs).days() + 'D ',
-    hours: dayjs.duration(differenceInMs).hours() + 'H ',
-    minutes: dayjs.duration(differenceInMs).minutes() + 'M',
+    days: addDoubleCountFormat(daysFormat) + 'D ',
+    hours: addDoubleCountFormat(hoursFormat) + 'H ',
+    minutes: addDoubleCountFormat(minutesFormat) + 'M',
   };
 
   if (differenceInMs < MS_IN_HOUR) {
@@ -124,7 +139,7 @@ export const checkPrice = (price) => {
 };
 
 export const getAllNameDestinations = (destinationsModel) => {
-  const destinations = destinationsModel.getDestinations();
+  const destinations = destinationsModel.get();
   const allDestinations = [];
   for (const destination of destinations) {
     const map = new Map(Object.entries(destination));

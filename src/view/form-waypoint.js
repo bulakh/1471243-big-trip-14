@@ -196,15 +196,14 @@ export default class FormWaypoint extends SmartView {
   constructor(waypoint = EMPTY_WAYPOINT, offersModel, destinationsModel, EDIT_FORM) {
     super();
 
-    this._dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
-    this._dueDestination = findDueDestination(destinationsModel.getDestinations(), waypoint.destination);
+    this._dueOffer = findDueOffer(offersModel.get(), waypoint.type);
+    this._dueDestination = findDueDestination(destinationsModel.get(), waypoint.destination);
 
     this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination);
     this._editForm = EDIT_FORM;
 
     this._offersModel = offersModel;
     this._destinationsModel = destinationsModel;
-
 
     this._datepickerStart = null;
     this._datepickerEnd = null;
@@ -277,7 +276,7 @@ export default class FormWaypoint extends SmartView {
       this.getElement().querySelector('.event__input--time-start'),
       {
         dateFormat: 'd/m/y H:i',
-        time_24hr: true,
+        'time_24hr': true,
         enableTime: true,
         defaultDate: new Date(this._data.dateFrom),
         onChange: this._startDateChangeHandler,
@@ -288,7 +287,7 @@ export default class FormWaypoint extends SmartView {
       this.getElement().querySelector('.event__input--time-end'),
       {
         dateFormat: 'd/m/y H:i',
-        time_24hr: true,
+        'time_24hr': true,
         enableTime: true,
         defaultDate: new Date(this._data.dateTo),
         onChange: this._endDateChangeHandler,
@@ -322,7 +321,7 @@ export default class FormWaypoint extends SmartView {
 
     const allDestinations = getAllNameDestinations(this._destinationsModel);
 
-    const findedDestination = this._destinationsModel.getDestinations().find(findDestinationHandler);
+    const findedDestination = this._destinationsModel.get().find(findDestinationHandler);
 
     this.updateData({
       DestinationInformation: Object.assign(
@@ -348,7 +347,7 @@ export default class FormWaypoint extends SmartView {
       }
     };
 
-    this._dueOffer = this._offersModel.getOffers().find(findTypeHandler);
+    this._dueOffer = this._offersModel.get().find(findTypeHandler);
 
     this.updateData({
       isOffer: this._dueOffer ? this._dueOffer.offers.length !== 0 : false,
@@ -397,6 +396,7 @@ export default class FormWaypoint extends SmartView {
   _priceChangeHandler(evt) {
     this.updateData({
       basePrice: checkPrice(evt.target.value),
+      isSubmitDisabled: checkPrice(evt.target.value) === 0,
     });
   }
 

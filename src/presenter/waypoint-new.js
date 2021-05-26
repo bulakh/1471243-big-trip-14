@@ -1,4 +1,4 @@
-import FormWaipointView from '../view/form.js';
+import FormWaipointView from '../view/form-waypoint.js';
 import {remove, render, RenderPosition} from '../utils/render.js';
 import {UserAction, UpdateType} from '../const.js';
 

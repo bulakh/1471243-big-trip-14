@@ -14,9 +14,9 @@ const createWaypointTemplate = (waypoint = {}, offersModel) => {
   } = waypoint;
 
   const renderOffers = (type, offerIds, offersModel) => {
-    const offerItems = new Array;
+    const offerItems = [];
     offerIds.map((offerId) => {
-      offersModel.getOffers().map((typeOffer) => {
+      offersModel.get().map((typeOffer) => {
         if (typeOffer.type === type) {
           typeOffer.offers.map((concreteOffer) => {
             if (concreteOffer.id === offerId) {

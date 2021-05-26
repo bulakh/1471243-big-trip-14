@@ -236,7 +236,7 @@ export default class Statistics extends SmartView {
   constructor(waypointsModel) {
     super();
 
-    this._data = waypointsModel.getWaypoints();
+    this._data = waypointsModel.get();
 
     this._moneyChart = null;
     this._typeChart = null;

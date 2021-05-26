@@ -46,18 +46,18 @@ export const getCountTypes = (waypoints, types) => {
 };
 
 export const getTimeFromType = (waypoints, types) => {
-  const time = [];
+  const times = [];
 
   types.map((elemX) => {
     const filteredOnType = waypoints.filter((waypoint) => waypoint.type === elemX);
-    const sumDiffInMs = [];
-    filteredOnType.map((elemY) => sumDiffInMs.push(dayjs(elemY.dateTo).diff(dayjs(elemY.dateFrom))));
+    const sumsDiffInMs = [];
+    filteredOnType.map((elemY) => sumsDiffInMs.push(dayjs(elemY.dateTo).diff(dayjs(elemY.dateFrom))));
     const typeAndTime = {
       type: elemX,
-      time: sumDiffInMs.reduce((a, b) => a + b, 0),
+      time: sumsDiffInMs.reduce((a, b) => a + b, 0),
     };
-    time.push(typeAndTime);
+    times.push(typeAndTime);
   });
-  return time;
+  return times;
 };
 

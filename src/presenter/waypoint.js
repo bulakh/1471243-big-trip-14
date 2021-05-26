@@ -1,4 +1,4 @@
-import FormWaipointView from '../view/form.js';
+import FormWaipointView from '../view/form-waypoint.js';
 import WaypointView from '../view/waypoint.js';
 import {isOnline} from '../utils/common.js';
 import {render, RenderPosition, replace, remove} from '../utils/render.js';

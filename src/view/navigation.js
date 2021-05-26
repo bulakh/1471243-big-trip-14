@@ -19,6 +19,14 @@ export default class Navigation extends AbstractView {
     return createNavigationTemplate();
   }
 
+  addClassItem(menuItem) {
+    this.getElement().querySelector(`[data-name=${menuItem}]`).classList.add('trip-tabs__btn--active');
+  }
+
+  removeClassItem(menuItem) {
+    this.getElement().querySelector(`[data-name=${menuItem}]`).classList.remove('trip-tabs__btn--active');
+  }
+
   _menuClickHandler(evt) {
     evt.preventDefault();
     this._callback.menuClick(evt.target.dataset.name);
@@ -27,13 +35,5 @@ export default class Navigation extends AbstractView {
   setMenuClickHandler(callback) {
     this._callback.menuClick = callback;
     this.getElement().addEventListener('click', this._menuClickHandler);
-  }
-
-  addClassItem(menuItem) {
-    this.getElement().querySelector(`[data-name=${menuItem}]`).classList.add('trip-tabs__btn--active');
-  }
-
-  removeClassItem(menuItem) {
-    this.getElement().querySelector(`[data-name=${menuItem}]`).classList.remove('trip-tabs__btn--active');
   }
 }

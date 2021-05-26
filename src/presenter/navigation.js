@@ -36,7 +36,7 @@ export default class Navigation {
       case MenuItem.ADD_EVENT:
         remove(this._statisticsComponent);
         this._tripPresenter.destroy();
-        this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+        this._filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
         this._tripPresenter.init();
         this._navigationComponent.removeClassItem(MenuItem.STATS);
         this._navigationComponent.addClassItem(MenuItem.TABLE);
@@ -48,7 +48,7 @@ export default class Navigation {
         break;
       case MenuItem.TABLE:
         this._tripPresenter.init();
-        this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+        this._filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
         remove(this._statisticsComponent);
         this._navigationComponent.removeClassItem(MenuItem.STATS);
         this._navigationComponent.addClassItem(MenuItem.TABLE);

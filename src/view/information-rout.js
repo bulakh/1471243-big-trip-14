@@ -10,7 +10,7 @@ const getSumCost = (waypoints, offersModel) => {
     const offerIds = map.get('offerIds');
     priceCount+= price;
 
-    const dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
+    const dueOffer = findDueOffer(offersModel.get(), waypoint.type);
 
     const offers = dueOffer.offers;
     for (const offer of offers) {
@@ -28,10 +28,12 @@ const getSumCost = (waypoints, offersModel) => {
 };
 
 const createInformationRoutTemplate = (waypoints, offersModel) => {
+  const COUNT_DESTINATIONS = 3;
+
   const sortedWaypoints = waypoints.sort(sortDate);
 
   const firstDestination = sortedWaypoints[0].destination;
-  const secondDestination = sortedWaypoints.length === 3 ? sortedWaypoints[1].destination : '...';
+  const secondDestination = sortedWaypoints.length === COUNT_DESTINATIONS ? sortedWaypoints[1].destination : '...';
   const lastDestination = sortedWaypoints[sortedWaypoints.length - 1].destination;
   const startDay = getTimeStartHeader(sortedWaypoints[0].dateFrom);
   const lastDay = getTimeEndHeader(sortedWaypoints[sortedWaypoints.length - 1].dateFrom);
@@ -58,6 +60,6 @@ export default class InformationRout extends AbstractView {
   }
 
   getTemplate() {
-    return createInformationRoutTemplate(this._waypointsModel.getWaypoints(), this._offersModel);
+    return createInformationRoutTemplate(this._waypointsModel.get(), this._offersModel);
   }
 }
