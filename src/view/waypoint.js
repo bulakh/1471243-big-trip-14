@@ -1,13 +1,22 @@
 import AbstractView from './abstract.js';
-import {dayOfStartEvent, timeStart, timeEnd, checkPrice} from '../utils/waypoint.js';
+import {getDayOfStartEvent, getTimeStart, getTimeEnd, checkPrice} from '../utils/waypoint.js';
 
 const createWaypointTemplate = (waypoint = {}, offersModel) => {
-  const {basePrice, dateFrom, dateTo, durationTime, type, destination, isFavorite, offerIds} = waypoint;
+  const {
+    basePrice,
+    dateFrom,
+    dateTo,
+    durationTime,
+    type,
+    destination,
+    isFavorite,
+    offerIds,
+  } = waypoint;
 
   const renderOffers = (type, offerIds, offersModel) => {
-    const offerItems = new Array;
+    const offerItems = [];
     offerIds.map((offerId) => {
-      offersModel.getOffers().map((typeOffer) => {
+      offersModel.get().map((typeOffer) => {
         if (typeOffer.type === type) {
           typeOffer.offers.map((concreteOffer) => {
             if (concreteOffer.id === offerId) {
@@ -32,16 +41,16 @@ const createWaypointTemplate = (waypoint = {}, offersModel) => {
 
   return `<li class="trip-events__item">
     <div class="event">
-      <time class="event__date" datetime="${dateFrom}">${dayOfStartEvent(dateFrom)}</time>
+      <time class="event__date" datetime="${dateFrom}">${getDayOfStartEvent(dateFrom)}</time>
       <div class="event__type">
         <img class="event__type-icon" width="42" height="42" src="img/icons/${type}.png" alt="Event type icon">
       </div>
       <h3 class="event__title">${type} ${destination}</h3>
       <div class="event__schedule">
         <p class="event__time">
-          <time class="event__start-time" datetime="${dateFrom}">${timeStart(dateFrom)}</time>
+          <time class="event__start-time" datetime="${dateFrom}">${getTimeStart(dateFrom)}</time>
           &mdash;
-          <time class="event__end-time" datetime="${dateTo}">${timeEnd(dateTo)}</time>
+          <time class="event__end-time" datetime="${dateTo}">${getTimeEnd(dateTo)}</time>
         </p>
         <p class="event__duration">${durationTime}</p>
       </div>
@@ -79,16 +88,6 @@ export default class Waypoint extends AbstractView {
     return createWaypointTemplate(this._waypoint, this._offersModel);
   }
 
-  _editClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.editClick();
-  }
-
-  _favoriteClickHandler(evt) {
-    evt.preventDefault();
-    this._callback.favoriteClick();
-  }
-
   setEditClickHandler(callback) {
     this._callback.editClick = callback;
     this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._editClickHandler);
@@ -97,5 +96,15 @@ export default class Waypoint extends AbstractView {
   setFavoriteClickHandler(callback) {
     this._callback.favoriteClick = callback;
     this.getElement().querySelector('.event__favorite-btn').addEventListener('click', this._favoriteClickHandler);
+  }
+
+  _editClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.editClick();
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
   }
 }

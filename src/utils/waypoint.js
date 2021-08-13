@@ -1,22 +1,27 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
-export const dayOfStartEvent = (dateFrom) => {return dayjs(dateFrom).format('D MMMM');};
+export const getDayOfStartEvent = (dateFrom) => {return dayjs(dateFrom).format('D MMMM');};
 
-export const timeStart = (dateFrom) => {return dayjs(dateFrom).format('HH:mm');};
-export const timeEnd = (dateTo) => {return dayjs(dateTo).format('HH:mm');};
+export const getTimeStart = (dateFrom) => {return dayjs(dateFrom).format('HH:mm');};
+export const getTimeEnd = (dateTo) => {return dayjs(dateTo).format('HH:mm');};
 
-export const timeStartOpenCard = (dateFrom) => {return dayjs(dateFrom).format('DD/MM/YY HH:mm');};
-export const timeEndOpenCard = (dateTo) => {return dayjs(dateTo).format('DD/MM/YY HH:mm');};
+export const getTimeStartOpenCard = (dateFrom) => {return dayjs(dateFrom).format('DD/MM/YY HH:mm');};
+export const getTimeEndOpenCard = (dateTo) => {return dayjs(dateTo).format('DD/MM/YY HH:mm');};
 
-export const timeStartHeader = (dateFrom) => {return dayjs(dateFrom).format('MMMM D');};
-export const timeEndHeader = (dateTo) => {return dayjs(dateTo).format('MMMM DD');};
+export const getTimeStartHeader = (dateFrom) => {return dayjs(dateFrom).format('MMMM D');};
+export const getTimeEndHeader = (dateTo) => {return dayjs(dateTo).format('MMMM DD');};
 
-export const futureDate = (dateFrom) => {
+export const getFutureDate = (dateFrom) => {
   return dayjs(dateFrom) >= dayjs(new Date());
 };
-export const pastDate = (dateFrom) => {
-  return dayjs(dateFrom) <= dayjs(new Date());
+
+export const getPastDate = (dateTo) => {
+  return dayjs(dateTo) <= dayjs(new Date());
+};
+
+export const getNowDate = (dateFrom, dateTo) => {
+  return dayjs(dateFrom) <= dayjs(new Date()) && dayjs(dateTo) >= dayjs(new Date());
 };
 
 const getWeightForNullCount = (CountA, CountB) => {
@@ -79,14 +84,29 @@ export const sortDate = (waypointA, waypointB) => {
   return waypointAdateFrom - waypointBbdateFrom;
 };
 
-export const getDiffToFormat = (differenceInMs) => {
+export const getDifferenceToFormat = (differenceInMs) => {
   const MS_IN_HOUR = 3600000;
   const MS_IN_DAY = 86400000;
 
+  const addDoubleCountFormat = (number) => {
+    const COUNT_SYMBOLS = 1;
+
+    const lengthOfNumber = String(number).split('').length;
+
+    if (lengthOfNumber === COUNT_SYMBOLS) {
+      return '0' + number;
+    }
+    return number;
+  };
+
+  const daysFormat = dayjs.duration(differenceInMs).days();
+  const hoursFormat = dayjs.duration(differenceInMs).hours();
+  const minutesFormat = dayjs.duration(differenceInMs).minutes();
+
   const difference = {
-    days: dayjs.duration(differenceInMs).days() + 'D ',
-    hours: dayjs.duration(differenceInMs).hours() + 'H ',
-    minutes: dayjs.duration(differenceInMs).minutes() + 'M',
+    days: addDoubleCountFormat(daysFormat) + 'D ',
+    hours: addDoubleCountFormat(hoursFormat) + 'H ',
+    minutes: addDoubleCountFormat(minutesFormat) + 'M',
   };
 
   if (differenceInMs < MS_IN_HOUR) {
@@ -97,13 +117,13 @@ export const getDiffToFormat = (differenceInMs) => {
   return difference.days + difference.hours + difference.minutes;
 };
 
-export const generateDurationTime = (start, end) => {
+export const createDurationTime = (start, end) => {
   dayjs.extend(duration);
   dayjs.duration(100);
 
   const differenceInMs = dayjs(end).diff(dayjs(start));
 
-  return getDiffToFormat(differenceInMs);
+  return getDifferenceToFormat(differenceInMs);
 };
 
 export const isDatesEqual = (dateA, dateB) => {
@@ -119,7 +139,7 @@ export const checkPrice = (price) => {
 };
 
 export const getAllNameDestinations = (destinationsModel) => {
-  const destinations = destinationsModel.getDestinations();
+  const destinations = destinationsModel.get();
   const allDestinations = [];
   for (const destination of destinations) {
     const map = new Map(Object.entries(destination));

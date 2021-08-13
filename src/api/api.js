@@ -20,7 +20,7 @@ export default class Api {
   }
 
   getAllDataFromServer() {
-    return Promise.all([this.getWaypointsWithoutAdapt(), this.getOffers(), this.getDestiantions()])
+    return Promise.all([this.getWaypoints(), this.getOffers(), this.getDestiantions()])
       .then((result) => {
         const [waypointsData, offersData, destionationData] = result;
         return [
@@ -42,7 +42,7 @@ export default class Api {
       .then(Api.toJSON);
   }
 
-  getWaypointsWithoutAdapt() {
+  getWaypoints() {
     return this._load({url: 'points'})
       .then(Api.toJSON);
   }

@@ -6,28 +6,12 @@ export default class Destinations extends Observer {
     this._destinations = [];
   }
 
-  setDestinations(updateType, destinations) {
+  set(updateType, destinations) {
     this._destinations = destinations.slice();
     this._notify(updateType);
   }
 
-  getDestinations() {
+  get() {
     return this._destinations;
-  }
-
-  updateDestinations(updateType, update) {
-    const index = this._destinations.findIndex((destination) => destination.name === update.name);
-
-    if (index === -1) {
-      throw new Error('Can\'t update unexisting destination');
-    }
-
-    this._destinations = [
-      ...this._destinations.slice(0, index),
-      update,
-      ...this._destinations.slice(index + 1),
-    ];
-
-    this._notify(updateType, update);
   }
 }

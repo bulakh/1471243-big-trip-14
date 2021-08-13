@@ -2,10 +2,10 @@ import SmartView from './smart.js';
 import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {getUniqTypes, getPricesFromType, getCountTypes, getTimeFromType} from '../utils/statistics.js';
-import {getDiffToFormat} from '../utils/waypoint.js';
+import {getDifferenceToFormat} from '../utils/waypoint.js';
 
-const renderMoneyChart = (moneyCtx, waypoints, uniqTypes, offers) =>{
-  const allPrices = getPricesFromType(waypoints, uniqTypes, offers);
+const renderMoneyChart = (moneyCtx, waypoints, uniqTypes) =>{
+  const allPrices = getPricesFromType(waypoints, uniqTypes);
   const sortedPricesAndTypes = allPrices.sort((a,b) => b.price - a.price);
 
   return new Chart(moneyCtx, {
@@ -171,7 +171,7 @@ const renderTimeChart = (timeCtx, waypoints, uniqTypes) => {
           color: '#000000',
           anchor: 'end',
           align: 'start',
-          formatter: (val) => `${getDiffToFormat(val)}`,
+          formatter: (val) => `${getDifferenceToFormat(val)}`,
         },
       },
       title: {
@@ -233,11 +233,10 @@ const createStatisticsTemplate = () => {
 };
 
 export default class Statistics extends SmartView {
-  constructor(waypointsModel, offersModel) {
+  constructor(waypointsModel) {
     super();
 
-    this._data = waypointsModel.getWaypoints();
-    this._offers = offersModel.getOffers();
+    this._data = waypointsModel.get();
 
     this._moneyChart = null;
     this._typeChart = null;
@@ -286,7 +285,7 @@ export default class Statistics extends SmartView {
     typeCtx.height = BAR_HEIGHT * MULTIPLY;
     timeCtx.height = BAR_HEIGHT * MULTIPLY;
 
-    this._moneyChart = renderMoneyChart(moneyCtx, this._data, this._uniqTypes, this._offers);
+    this._moneyChart = renderMoneyChart(moneyCtx, this._data, this._uniqTypes);
     this._typeChart = renderTypeChart(typeCtx, this._data, this._uniqTypes);
     this._timeChart = renderTimeChart(timeCtx, this._data, this._uniqTypes);
   }

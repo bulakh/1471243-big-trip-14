@@ -1,5 +1,5 @@
 import Observer from '../utils/observer.js';
-import {generateDurationTime, getOfferIds, getOffersOnId, getDestination} from '../utils/waypoint.js';
+import {createDurationTime, getOfferIds, getOffersOnId, getDestination} from '../utils/waypoint.js';
 
 export default class Waypoints extends Observer {
   constructor() {
@@ -7,16 +7,16 @@ export default class Waypoints extends Observer {
     this._waypoints = [];
   }
 
-  setWaypoints(updateType, waypoints) {
+  set(updateType, waypoints) {
     this._waypoints = waypoints.slice();
     this._notify(updateType);
   }
 
-  getWaypoints() {
+  get() {
     return this._waypoints;
   }
 
-  updateWaypoint(updateType, update) {
+  update(updateType, update) {
     const index = this._waypoints.findIndex((waypoint) => waypoint.id === update.id);
 
     if (index === -1) {
@@ -32,7 +32,7 @@ export default class Waypoints extends Observer {
     this._notify(updateType, update);
   }
 
-  addWaypoint(updateType, update) {
+  add(updateType, update) {
     this._waypoints = [
       update,
       ...this._waypoints,
@@ -41,7 +41,7 @@ export default class Waypoints extends Observer {
     this._notify(updateType, update);
   }
 
-  deleteWaypoint(updateType, update) {
+  delete(updateType, update) {
     const index = this._waypoints.findIndex((waypoint) => waypoint.id === update.id);
 
     if (index === -1) {
@@ -65,7 +65,7 @@ export default class Waypoints extends Observer {
         basePrice: waypoint.base_price,
         dateFrom: new Date(waypoint.date_from),
         dateTo: new Date(waypoint.date_to),
-        durationTime: generateDurationTime(waypoint.date_from, waypoint.date_to),
+        durationTime: createDurationTime(waypoint.date_from, waypoint.date_to),
         isFavorite: waypoint.is_favorite,
         offerIds: getOfferIds(waypoint.type, waypoint.offers, allOffers),
       },

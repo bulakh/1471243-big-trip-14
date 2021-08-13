@@ -1,6 +1,6 @@
 import SmartView from './smart.js';
 import {TYPES, EMPTY_WAYPOINT} from '../const.js';
-import {timeStartOpenCard, timeEndOpenCard, generateDurationTime, checkPrice, getAllNameDestinations} from '../utils/waypoint.js';
+import {getTimeStartOpenCard, getTimeEndOpenCard, createDurationTime, checkPrice, getAllNameDestinations} from '../utils/waypoint.js';
 import {findDueOffer, findDueDestination, getUpperFirstLetter} from '../utils/common.js';
 import dayjs from 'dayjs';
 import flatpickr from 'flatpickr';
@@ -8,7 +8,7 @@ import '../../node_modules/flatpickr/dist/flatpickr.min.css';
 
 const renderPictures = (information) => {
   const pictures = information.pictures;
-  const imgItems = new Array;
+  const imgItems = [];
   for (const picture of pictures) {
     const map = new Map(Object.entries(picture));
     const src = map.get('src');
@@ -35,7 +35,7 @@ const createNameDestination = (destinationsModel) => {
 };
 
 const createOffer = (offers, type, offerIds, disabledInput) => {
-  const offerItems = new Array;
+  const offerItems = [];
   for (const offer of offers) {
     const map = new Map(Object.entries(offer));
     const title = map.get('title');
@@ -116,8 +116,8 @@ const createFormEventTemplate = (data, editForm, dueOffer, destinationsModel) =>
 
   const typeTemplate = createTypeEvent(type, id, isDisabled);
   const destinationTemplate = createNameDestination(destinationsModel);
-  const timeStart = timeStartOpenCard(dateFrom);
-  const timeEnd = timeEndOpenCard(dateTo);
+  const timeStart = getTimeStartOpenCard(dateFrom);
+  const timeEnd = getTimeEndOpenCard(dateTo);
 
   const editTemplateCancel = toggleEditCancelButton(editForm, isDeleting);
   const editRollupButton = renderRollupButton(editForm);
@@ -196,15 +196,14 @@ export default class FormWaypoint extends SmartView {
   constructor(waypoint = EMPTY_WAYPOINT, offersModel, destinationsModel, EDIT_FORM) {
     super();
 
-    this._dueOffer = findDueOffer(offersModel.getOffers(), waypoint.type);
-    this._dueDestination = findDueDestination(destinationsModel.getDestinations(), waypoint.destination);
+    this._dueOffer = findDueOffer(offersModel.get(), waypoint.type);
+    this._dueDestination = findDueDestination(destinationsModel.get(), waypoint.destination);
 
-    this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, EDIT_FORM);
+    this._data = FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination);
     this._editForm = EDIT_FORM;
 
     this._offersModel = offersModel;
     this._destinationsModel = destinationsModel;
-
 
     this._datepickerStart = null;
     this._datepickerEnd = null;
@@ -234,7 +233,7 @@ export default class FormWaypoint extends SmartView {
 
   reset(waypoint) {
     this.updateData(
-      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination, this._editForm),
+      FormWaypoint.parseWaypointToData(waypoint, this._dueOffer, this._dueDestination),
     );
   }
 
@@ -244,6 +243,23 @@ export default class FormWaypoint extends SmartView {
     this.setCardtoBackHandler(this._callback.backClick);
     this.setDeleteClickHandler(this._callback.deleteClick);
     this._setDatepicker();
+  }
+
+  setFormSubmitHandler(callback) {
+    this._callback.formSubmit = callback;
+    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
+  }
+
+  setCardtoBackHandler(callback) {
+    this._callback.backClick = callback;
+    if (this._editForm) {
+      this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
+    }
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
   }
 
   _setInnerHandlers() {
@@ -277,7 +293,7 @@ export default class FormWaypoint extends SmartView {
       this.getElement().querySelector('.event__input--time-start'),
       {
         dateFormat: 'd/m/y H:i',
-        time_24hr: true,
+        'time_24hr': true,
         enableTime: true,
         defaultDate: new Date(this._data.dateFrom),
         onChange: this._startDateChangeHandler,
@@ -288,7 +304,7 @@ export default class FormWaypoint extends SmartView {
       this.getElement().querySelector('.event__input--time-end'),
       {
         dateFormat: 'd/m/y H:i',
-        time_24hr: true,
+        'time_24hr': true,
         enableTime: true,
         defaultDate: new Date(this._data.dateTo),
         onChange: this._endDateChangeHandler,
@@ -299,7 +315,7 @@ export default class FormWaypoint extends SmartView {
   _durationCountHandler(evt) {
     evt.preventDefault();
     this.updateData({
-      durationTime: generateDurationTime(this._data.dateFrom, this._data.dateTo),
+      durationTime: createDurationTime(this._data.dateFrom, this._data.dateTo),
       isSubmitDisabled: dayjs(this._data.dateTo).diff(dayjs(this._data.dateFrom)) < 0,
     });
   }
@@ -322,7 +338,7 @@ export default class FormWaypoint extends SmartView {
 
     const allDestinations = getAllNameDestinations(this._destinationsModel);
 
-    const findedDestination = this._destinationsModel.getDestinations().find(findDestinationHandler);
+    const findedDestination = this._destinationsModel.get().find(findDestinationHandler);
 
     this.updateData({
       DestinationInformation: Object.assign(
@@ -348,7 +364,7 @@ export default class FormWaypoint extends SmartView {
       }
     };
 
-    this._dueOffer = this._offersModel.getOffers().find(findTypeHandler);
+    this._dueOffer = this._offersModel.get().find(findTypeHandler);
 
     this.updateData({
       isOffer: this._dueOffer ? this._dueOffer.offers.length !== 0 : false,
@@ -357,15 +373,22 @@ export default class FormWaypoint extends SmartView {
   }
 
   _offersToggleHandler(evt) {
-    const offersIsChecked = this._data.offerIds;
-    const currentOfferId = evt.target.dataset.id;
-    const offerIndex = offersIsChecked.indexOf(currentOfferId);
 
-    offerIndex !== -1 ? offersIsChecked.splice(offerIndex, 1) : offersIsChecked.push(currentOfferId);
+    const getCheckedOfferIds = (offersIsChecked) => {
+      const newOfferIds = [];
+      offersIsChecked.map((id) => {
+        newOfferIds.push(id);
+      });
+      const currentOfferId = evt.target.dataset.id;
+      const offerIndex = newOfferIds.indexOf(currentOfferId);
+
+      offerIndex !== -1 ? newOfferIds.splice(offerIndex, 1) : newOfferIds.push(currentOfferId);
+      return newOfferIds;
+    };
 
     this.updateData({
-      offerIds: offersIsChecked,
-    }, true);
+      offerIds: getCheckedOfferIds(this._data.offerIds),
+    });
   }
 
   _startDateChangeHandler([userDate]) {
@@ -389,7 +412,8 @@ export default class FormWaypoint extends SmartView {
 
   _priceChangeHandler(evt) {
     this.updateData({
-      basePrice: parseInt(evt.target.value, 10),
+      basePrice: checkPrice(evt.target.value),
+      isSubmitDisabled: checkPrice(evt.target.value) === 0,
     });
   }
 
@@ -408,24 +432,7 @@ export default class FormWaypoint extends SmartView {
     this._callback.deleteClick(FormWaypoint.parseDataToWaypoint(this._data));
   }
 
-  setFormSubmitHandler(callback) {
-    this._callback.formSubmit = callback;
-    this.getElement().querySelector('form').addEventListener('submit', this._formSubmitHandler);
-  }
-
-  setCardtoBackHandler(callback) {
-    this._callback.backClick = callback;
-    if (this._editForm) {
-      this.getElement().querySelector('.event__rollup-btn').addEventListener('click', this._backToCardClickHandler);
-    }
-  }
-
-  setDeleteClickHandler(callback) {
-    this._callback.deleteClick = callback;
-    this.getElement().querySelector('.event__reset-btn').addEventListener('click', this._formDeleteClickHandler);
-  }
-
-  static parseWaypointToData(waypoint, dueOffer, dueDestination, editForm) {
+  static parseWaypointToData(waypoint, dueOffer, dueDestination) {
     return Object.assign(
       {},
       waypoint,
@@ -434,7 +441,6 @@ export default class FormWaypoint extends SmartView {
         isDestination: dueDestination ? dueDestination !== '' : false,
         isSubmitDisabled: dayjs(waypoint.dateTo).diff(dayjs(waypoint.dateFrom)) < 0 || waypoint.destination === '',
         DestinationInformation: dueDestination,
-        offerIds: !editForm ? [] : waypoint.offerIds,
         isDisabled: false,
         isSaving: false,
         isDeleting: false,

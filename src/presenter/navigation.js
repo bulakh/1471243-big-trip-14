@@ -5,7 +5,13 @@ import {isOnline} from '../utils/common.js';
 import {toast} from '../utils/toast.js';
 
 export default class Navigation {
-  constructor(pageContainer, waypointsModel, offersModel, navigationComponent, buttonNewEventComponent, tripPresenter, filterModel) {
+  constructor(
+    pageContainer,
+    waypointsModel,
+    navigationComponent,
+    buttonNewEventComponent,
+    tripPresenter,
+    filterModel) {
     this._pageContainer = pageContainer;
 
     this._navigationComponent = navigationComponent;
@@ -16,7 +22,6 @@ export default class Navigation {
 
     this._filterModel = filterModel;
     this._waypointsModel = waypointsModel;
-    this._offersModel = offersModel;
 
     this._handleSiteMenuClick = this._handleSiteMenuClick.bind(this);
   }
@@ -31,7 +36,7 @@ export default class Navigation {
       case MenuItem.ADD_EVENT:
         remove(this._statisticsComponent);
         this._tripPresenter.destroy();
-        this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+        this._filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
         this._tripPresenter.init();
         this._navigationComponent.removeClassItem(MenuItem.STATS);
         this._navigationComponent.addClassItem(MenuItem.TABLE);
@@ -43,14 +48,14 @@ export default class Navigation {
         break;
       case MenuItem.TABLE:
         this._tripPresenter.init();
-        this._filterModel.setFilter(UpdateType.MAJOR, FilterType.EVERYTHING);
+        this._filterModel.set(UpdateType.MAJOR, FilterType.EVERYTHING);
         remove(this._statisticsComponent);
         this._navigationComponent.removeClassItem(MenuItem.STATS);
         this._navigationComponent.addClassItem(MenuItem.TABLE);
         break;
       case MenuItem.STATS:
         this._tripPresenter.destroy();
-        this._statisticsComponent = new StatisticsView(this._waypointsModel, this._offersModel);
+        this._statisticsComponent = new StatisticsView(this._waypointsModel);
         render(this._pageContainer, this._statisticsComponent, RenderPosition.BEFOREEND);
         this._navigationComponent.removeClassItem(MenuItem.TABLE);
         this._navigationComponent.addClassItem(MenuItem.STATS);

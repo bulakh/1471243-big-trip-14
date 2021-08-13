@@ -1,12 +1,10 @@
 export const TYPES = ['taxi', 'bus', 'train', 'ship', 'transport', 'drive', 'flight', 'check-in', 'sightseeing', 'restaurant'];
-export const TITLES_OFFERS = ['Choose meal', 'Upgrade to comfort class', 'Order Uber', 'Add luggage', 'Switch to comfort'];
-export const DESTINATIONS = ['Paris', 'Rome', 'Berlin', 'Lisbon', 'Barcelona', 'Amsterdam', 'Moscow'];
 
 export const EMPTY_WAYPOINT = {
   id: '',
   type: TYPES[0],
   destination:  '',
-  basePrice: 0,
+  basePrice: 10,
   dateFrom : new Date(),
   dateTo: new Date(),
   durationTime: '',
